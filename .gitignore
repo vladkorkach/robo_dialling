@@ -1,0 +1,7 @@
+*pycache*
+*.pyc
+*.bak
+*.dat
+*.dir
+*.sqlite3
+.idea
