@@ -15,9 +15,13 @@ def send_notifiction(*args, **kwargs):
     print(args)
     print(kwargs)
     numbers = PhoneNumber.objects.filter(id__in=args)
-    print(numbers)
-
-    print('Here I\’m')
+    infos = []
+    for number in numbers:
+        print(number)
+        info = CallInfo(phone_dialed=number, time_before_hang=9)
+        infos.append(info)
+    CallInfo.objects.bulk_create(infos)
+    print(infos)
 
 
 # @shared_task()
