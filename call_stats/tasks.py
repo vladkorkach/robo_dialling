@@ -21,11 +21,20 @@ class TaskWrapper(celery.Task):
         pass
 
 
-@shared_task()
-def send_notifiction(*args, **kwargs):
-    print(celery.current_task)
-    print(celery.current_task.request.id)
-    print("aaa")
+@shared_task(name='TwilioCaller', base=TaskWrapper)
+def make_twilio_call(*args, **kwargs):
+    print(args)
+    numbers = CeleryPhoneModel.objects.filter(id__in=args)
+    infos = []
+
+    for number in numbers:
+        print(number)
+        info = CallStat(phone_dialed=number, time_before_hang=9)
+        infos.append(info)
+
+    CallStat.objects.bulk_create(infos)
+    print(infos)
+
 # @app.task()
 # def task_number_one(a, b):
 #     print('asdfg')
@@ -43,8 +52,3 @@ def send_notifiction(*args, **kwargs):
 #         infos.append(info)
 #     CallInfo.objects.bulk_create(infos)
 #     print(infos)
-
-
-# @shared_task()
-# def make_call(*args, **kwargs):
-#     pass

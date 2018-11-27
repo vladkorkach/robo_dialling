@@ -1,3 +1,4 @@
+import json
 from django.db import models
 from django.contrib.auth.models import User
 from django_celery_beat.models import PeriodicTask
@@ -20,8 +21,7 @@ class CeleryPhoneModel(PeriodicTask):
     organization = models.CharField(max_length=255, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.kwargs = {"pk": self.pk, "number": self.number}
-
+        self.args = [self.pk]
         self.exchange = self.exchange or None
         self.routing_key = self.routing_key or None
         self.queue = self.queue or None
