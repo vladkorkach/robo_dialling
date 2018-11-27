@@ -20,21 +20,21 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 
-@app.task
-def test(arg):
-    print(arg)
+# @app.task
+# def test(arg):
+#     print(arg)
 
 
-app.conf.beat_schedule = {
-    'add-every-30-seconds': {
-        'task': 'call_stats.tasks.task_number_one',
-        'schedule': 30.0,
-        'args': (16, 16)
-    },
-}
-app.conf.timezone = 'UTC'
+# app.conf.beat_schedule = {
+#     'add-every-30-seconds': {
+#         'task': 'call_stats.tasks.task_number_one',
+#         'schedule': 30.0,
+#         'args': (16, 16)
+#     },
+# }
+# app.conf.timezone = 'UTC'
 
 
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+# @app.task(bind=True)
+# def debug_task(self):
+#     print('Request: {0!r}'.format(self.request))

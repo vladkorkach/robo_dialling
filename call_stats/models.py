@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django_celery_beat.models import PeriodicTask
 # Create your models here.
 
 
@@ -53,5 +54,18 @@ class TwilioSettings(models.Model):
     pass
 
 
-# class CeleryModel(models.Model):
-#     celery_task_id = models.CharField(max_length=50, unique=True)
+class CeleryPhoneModel(PeriodicTask):
+    title = models.CharField(max_length=100, null=True, blank=True)
+    number = models.CharField(max_length=14, null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    organization = models.CharField(max_length=255, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.kwargs = {"pk": self.pk, "number": self.number}
+
+        self.exchange = self.exchange or None
+        self.routing_key = self.routing_key or None
+        self.queue = self.queue or None
+        if not self.enabled:
+            self.last_run_at = None
+        super(PeriodicTask, self).save(*args, **kwargs)

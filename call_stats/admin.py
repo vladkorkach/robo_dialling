@@ -2,7 +2,7 @@ from django.contrib import admin
 import csv
 from django.http import HttpResponse
 
-from call_stats.models import PhoneNumber, CallInfo, RepeatPeriod, WeekDay, Schedule
+from call_stats.models import PhoneNumber, CallInfo, RepeatPeriod, WeekDay, Schedule, CeleryPhoneModel
 
 
 class PhoneNumbersAdmin(admin.ModelAdmin):
@@ -13,17 +13,16 @@ class ExportCsvMixin:
     def export_as_csv(self, request, queryset):
 
         meta = self.model._meta
-        print(meta.fields)
+
         field_names = [field.name for field in meta.fields]
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
         writer = csv.writer(response)
 
-        writer.writerow(field_names)
+        writer.writerow(field_names + ["department", "organization"])
         for obj in queryset:
-            print(obj.phone_dialed.department)
-            # row = writer.writerow([getattr(obj, field) for field in field_names])
+            row = writer.writerow([getattr(obj, field) for field in field_names] + [obj.phone_dialed.department, obj.phone_dialed.organization])
 
         return response
 
@@ -60,8 +59,13 @@ class ScheduleAdmin(admin.ModelAdmin):
     pass
 
 
+class CeleryPhoneModelAdmin(admin.ModelAdmin):
+    fields = ("name", "organization", "department", "number", "title", "interval", "crontab", "enabled", "kwargs")
+
+
 admin.site.register(PhoneNumber, PhoneNumbersAdmin)
 admin.site.register(CallInfo, CallInfoAdmin)
 admin.site.register(RepeatPeriod, RepeatPeriodAdmin)
 admin.site.register(WeekDay, WeekDayAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
+admin.site.register(CeleryPhoneModel, CeleryPhoneModelAdmin)
