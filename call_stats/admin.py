@@ -2,11 +2,7 @@ from django.contrib import admin
 import csv
 from django.http import HttpResponse
 
-from call_stats.models import PhoneNumber, CallInfo, RepeatPeriod, WeekDay, Schedule, CeleryPhoneModel
-
-
-class PhoneNumbersAdmin(admin.ModelAdmin):
-    pass
+from call_stats.models import CeleryPhoneModel, CallStat
 
 
 class ExportCsvMixin:
@@ -29,7 +25,7 @@ class ExportCsvMixin:
     export_as_csv.short_description = "Export Selected"
 
 
-class CallInfoAdmin(admin.ModelAdmin, ExportCsvMixin):
+class CallStatAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_display = ("phone_dialed", "time_before_hang", "date", "get_department", "get_organization")
     list_filter = ("phone_dialed", "time_before_hang", "date", "phone_dialed__organization", "phone_dialed__organization")
     actions = ["export_as_csv"]
@@ -41,31 +37,15 @@ class CallInfoAdmin(admin.ModelAdmin, ExportCsvMixin):
         return obj.phone_dialed.organization
 
     def get_queryset(self, request):
-        return super(CallInfoAdmin, self).get_queryset(request).prefetch_related("phone_dialed")
+        return super(CallStatAdmin, self).get_queryset(request).prefetch_related("phone_dialed")
 
     def phones(self, obj):
         return self.phone_dialed_set.all()
-
-
-class RepeatPeriodAdmin(admin.ModelAdmin):
-    pass
-
-
-class WeekDayAdmin(admin.ModelAdmin):
-    pass
-
-
-class ScheduleAdmin(admin.ModelAdmin):
-    pass
 
 
 class CeleryPhoneModelAdmin(admin.ModelAdmin):
     fields = ("name", "organization", "department", "number", "title", "interval", "crontab", "enabled", "kwargs")
 
 
-admin.site.register(PhoneNumber, PhoneNumbersAdmin)
-admin.site.register(CallInfo, CallInfoAdmin)
-admin.site.register(RepeatPeriod, RepeatPeriodAdmin)
-admin.site.register(WeekDay, WeekDayAdmin)
-admin.site.register(Schedule, ScheduleAdmin)
+admin.site.register(CallStat, CallStatAdmin)
 admin.site.register(CeleryPhoneModel, CeleryPhoneModelAdmin)

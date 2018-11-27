@@ -3,7 +3,7 @@ from robo_call.celery import app
 import celery
 from celery import task
 from celery import shared_task
-from .models import PhoneNumber, CallInfo
+from .models import CeleryPhoneModel, CallStat
 
 
 class TaskWrapper(celery.Task):
