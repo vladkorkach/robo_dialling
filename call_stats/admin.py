@@ -44,7 +44,8 @@ class CallStatAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 
 class CeleryPhoneModelAdmin(admin.ModelAdmin):
-    fields = ("name", "organization", "department", "number", "title", "interval", "crontab", "enabled", "kwargs")
+    list_display = ("number", "enabled", "interval", "crontab")
+    fields = ("name", "organization", "department", "number", "title", "interval", "crontab", "solar", "enabled")
 
 
 admin.site.register(CallStat, CallStatAdmin)
