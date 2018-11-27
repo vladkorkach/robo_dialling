@@ -16,9 +16,9 @@ class ExportCsvMixin:
         response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
         writer = csv.writer(response)
 
-        writer.writerow(field_names + ["department", "organization"])
+        writer.writerow(field_names + ["department", "organization", "purpose"])
         for obj in queryset:
-            row = writer.writerow([getattr(obj, field) for field in field_names] + [obj.phone_dialed.department, obj.phone_dialed.organization])
+            row = writer.writerow([getattr(obj, field) for field in field_names] + [obj.phone_dialed.department, obj.phone_dialed.organization, obj.phone_dialed.purpose])
 
         return response
 
@@ -45,7 +45,7 @@ class CallStatAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 class CeleryPhoneModelAdmin(admin.ModelAdmin):
     list_display = ("number", "enabled", "interval", "crontab")
-    fields = ("name", "organization", "department", "number", "title", "interval", "crontab", "solar", "enabled")
+    fields = ("name", "organization", "department", "number", "purpose", "interval", "crontab", "solar", "enabled")
 
 
 admin.site.register(CallStat, CallStatAdmin)

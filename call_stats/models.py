@@ -4,10 +4,10 @@ from django_celery_beat.models import PeriodicTask
 
 
 class CeleryPhoneModel(PeriodicTask):
-    title = models.CharField(max_length=100, null=True, blank=True)
     number = models.CharField(max_length=14, null=True, blank=True)
     department = models.CharField(max_length=255, null=True, blank=True)
     organization = models.CharField(max_length=255, null=True, blank=True)
+    purpose = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         self.task = "TwilioCaller"
