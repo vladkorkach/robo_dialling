@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        {% block content %}{% endblock content %}
+        <footer>
+            <script src="//www.amcharts.com/lib/4/core.js"></script>
+            <script src="//www.amcharts.com/lib/4/charts.js"></script>
+            <script src="//www.amcharts.com/lib/4/themes/animated.js"></script>
+            <script src="//www.amcharts.com/lib/4/maps.js"></script>
+            {% load staticfiles %}
+            <script src="{% static "call_stats/app.js" %}"></script>
+        </footer>
+    </body>
+</html>

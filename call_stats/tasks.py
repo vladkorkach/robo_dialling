@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import celery
 from celery import shared_task
+import random
 from .models import CeleryPhoneModel, CallStat
 
 
@@ -25,7 +26,7 @@ def make_twilio_call(*args, **kwargs):
     infos = []
 
     for number in numbers:
-        info = CallStat(phone_dialed=number, time_before_hang=9)
+        info = CallStat(phone_dialed=number, time_before_hang=random.randint(0, 9))
         infos.append(info)
 
     CallStat.objects.bulk_create(infos)
