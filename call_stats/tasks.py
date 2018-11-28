@@ -5,6 +5,7 @@ import random
 from .models import CeleryPhoneModel, CallStat
 
 
+# TODO logs
 class TaskWrapper(celery.Task):
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):

@@ -3,6 +3,8 @@ from .models import CallStat
 from django.http import HttpResponse
 from django.db.models import Count, Sum
 import json
+from datetime import timedelta
+from django.utils import timezone
 
 
 def generate_chart_object(names, data):
@@ -39,6 +41,15 @@ def generate_chart_object(names, data):
 
 def index(request):
     template = loader.get_template("call_stats/index.html")
+
+    some_day_last_week = timezone.now().date() - timedelta(days=7)
+    monday_of_last_week = some_day_last_week - timedelta(days=(some_day_last_week.isocalendar()[2] - 1))
+    monday_of_this_week = monday_of_last_week + timedelta(days=7)
+
+    week_count = CallStat.objects.filter(date__gte=monday_of_last_week, date__lt=monday_of_this_week).count()
+
+    # print(week_count)
+
     a = CallStat.objects.all().values('phone_dialed__callstat__date', 'phone_dialed__organization').annotate(total=Count('phone_dialed')).prefetch_related("phone_dialed")
     l = []
     names = []
@@ -64,6 +75,8 @@ def index(request):
     names = list(myset)
     chart_object = generate_chart_object(names, l)
     context = {
-        "chart": json.dumps(chart_object)
+        "chart": json.dumps(chart_object),
+        "twilio_balance": 0,
+        "total_this_week": week_count
     }
     return HttpResponse(template.render(context, request))
