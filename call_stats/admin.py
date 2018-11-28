@@ -44,7 +44,7 @@ class CallStatAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 
 class CeleryPhoneModelAdmin(admin.ModelAdmin):
-    list_display = ("number", "enabled", "interval", "crontab")
+    list_display = ("number", "enabled", "interval", "crontab", "organization", "department")
     fields = ("name", "organization", "department", "number", "purpose", "interval", "crontab", "solar", "enabled")
 
 
