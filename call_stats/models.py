@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django_celery_beat.models import PeriodicTask
+from django_celery_beat.models import PeriodicTask, PeriodicTasks
 import os
 import signal
 
@@ -35,6 +35,7 @@ class CeleryPhoneModel(PeriodicTask):
         else:
             self.args = [self.pk]
             super(CeleryPhoneModel, self).save(*args, **kwargs)
+        PeriodicTasks.update_changed()
 
     def __str__(self):
         return self.number
