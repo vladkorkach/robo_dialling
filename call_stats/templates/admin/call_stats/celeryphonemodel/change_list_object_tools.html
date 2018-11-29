@@ -1,0 +1,24 @@
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if has_add_permission %}
+  <li>
+    {% url cl.opts|admin_urlname:'add' as add_url %}
+    <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
+      {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+    </a>
+  </li>
+  <li>
+      <form enctype="multipart/form-data" action="/admin/file" method="post" id="importform">
+        {% csrf_token %}
+          <input type="hidden" name="db_export" value="phone_numbers">
+          <input id="parse_file" name="db_file" type="file" value="load">
+          <script>
+              document.getElementById("parse_file").onchange = function() {
+                  document.getElementById("importform").submit();
+              }
+          </script>
+      </form>
+  </li>
+  {% endif %}
+{% endblock %}

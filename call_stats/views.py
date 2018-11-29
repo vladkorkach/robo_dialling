@@ -1,10 +1,14 @@
+from django.shortcuts import redirect
 from django.template import loader
+from django.urls import reverse
+
 from .models import CallStat
 from django.http import HttpResponse
 from django.db.models import Count, Sum
 import json
 from datetime import timedelta
 from django.utils import timezone
+from .importer import Importer
 
 
 def generate_chart_object(names, data):
@@ -80,3 +84,11 @@ def index(request):
         "total_this_week": week_count
     }
     return HttpResponse(template.render(context, request))
+
+
+def upload_file(request):
+    name = request.POST.get("db_name")
+    file_obj = request.FILES['db_file']
+    Importer(file_object=file_obj)
+
+    return redirect(reverse("admin:api_{}_changelist".format(name)))
