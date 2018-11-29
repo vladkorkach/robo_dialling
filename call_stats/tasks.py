@@ -19,13 +19,9 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
 
-# TODO logs
 class TaskWrapper(celery.Task):
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        # exc (Exception) - The exception raised by the task.
-        # args (Tuple) - Original arguments for the task that failed.
-        # kwargs (Dict) - Original keyword arguments for the task that failed.
         msg = '{0!r} failed: {1!r} args:{2!}'.format(task_id, exc, str(args))
         logging.error(msg)
 
