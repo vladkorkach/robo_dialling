@@ -70,7 +70,7 @@ def index(request):
                 tmp = {}
                 tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H-%M-%S')
                 tmp[data["phone_dialed__organization"]] = data['total']
-    # print(l)
+
     myset = set(names)
     names = list(myset)
     chart_object = generate_chart_object(names, l)

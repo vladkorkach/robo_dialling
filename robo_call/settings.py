@@ -109,12 +109,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # For RabbitMQ
 CELERY_BROKER_URL = 'amqp://celery:celery123@localhost/celery_vhost'
 CELERY_RESULT_BACKEND = 'amqp://celery:celery123@localhost/celery_vhost'
+# CELERY_RESULT_BACKEND = 'db+postgresql://calls:root@localhost/calls'
 # CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 # Celery Data Format
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = ''
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+BEAT_SYNC_EVERY = 1
 
 
 # Internationalization

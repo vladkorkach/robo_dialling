@@ -5,3 +5,4 @@
 *.dir
 *.sqlite3
 .idea
+*.log
