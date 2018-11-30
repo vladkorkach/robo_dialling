@@ -50,21 +50,22 @@ def index(request):
     monday_of_last_week = some_day_last_week - timedelta(days=(some_day_last_week.isocalendar()[2] - 1))
     monday_of_this_week = monday_of_last_week + timedelta(days=7)
 
-    week_count = CallStat.objects.filter(date__gte=monday_of_last_week, date__lt=monday_of_this_week).count()
+    week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
 
     # print(week_count)
 
     a = CallStat.objects.all().values('phone_dialed__callstat__date', 'phone_dialed__organization').annotate(total=Count('phone_dialed')).order_by('phone_dialed__callstat__date').prefetch_related("phone_dialed")
+    # print(a)
     l = []
     names = []
     tmp = {}
     for data in a:
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
-            tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H-%M')
+            tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H')
             tmp[data["phone_dialed__organization"]] = data['total']
         else:
-            if tmp["date"] == data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H-%M'):
+            if tmp["date"] == data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
                 else:
@@ -72,7 +73,7 @@ def index(request):
             else:
                 l.append(tmp)
                 tmp = {}
-                tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H-%M')
+                tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H')
                 tmp[data["phone_dialed__organization"]] = data['total']
 
     myset = set(names)
