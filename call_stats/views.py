@@ -9,6 +9,7 @@ import json
 from datetime import timedelta
 from django.utils import timezone
 from .importer import Importer
+from .call_maker import TwilioCaller
 
 
 def generate_chart_object(names, data):
@@ -101,3 +102,11 @@ def upload_file(request):
     Importer(file_object=file_obj)
 
     return redirect(reverse("admin:api_{}_changelist".format(name)))
+
+
+def debug_call_route(request):
+    caller = TwilioCaller(request.user.pk)
+    c = caller.make_call()
+    print(c.account_sid)
+    print(c.auth_token)
+    return HttpResponse("aaa")

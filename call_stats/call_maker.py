@@ -1,13 +1,15 @@
 from twilio.rest import Client
-from .models import TwilioSettings
+from .models import TwilioSetting
 
 
 class TwilioCaller:
-    def __init__(self):
-        pass
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.settings = self.prepare_settings()
 
     def prepare_settings(self):
-        settings = TwilioSettings.objects.all()
+        settings = TwilioSetting.objects.filter(user__pk=self.user_id).first()
+        return settings
 
     def make_call(self):
-        pass
+        return self.settings

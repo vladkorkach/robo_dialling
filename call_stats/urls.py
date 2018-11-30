@@ -4,5 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.index, name="index")
+    path('', views.index, name="index"),
+    path('call/', views.debug_call_route, name="debug")
 ]
