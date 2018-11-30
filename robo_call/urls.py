@@ -27,5 +27,3 @@ urlpatterns = [
     path('admin/file', upload_file),
     path('call_stats/', include('call_stats.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-urlpatterns += staticfiles_urlpatterns()
