@@ -34,7 +34,7 @@ def generate_chart_object(names, data):
         },
         "categoryAxis": {
             "parseDates": True,
-            "minPeriod": "ss"
+            "minPeriod": "hh"
         },
         "categoryField": "date",
         "dataDateFormat": "YYYY-MM-DD JJ:NN:SS",
@@ -54,18 +54,26 @@ def index(request):
 
     # print(week_count)
 
-    a = CallStat.objects.all().values('phone_dialed__callstat__date', 'phone_dialed__organization').annotate(total=Count('phone_dialed')).order_by('phone_dialed__callstat__date').prefetch_related("phone_dialed")
-    # print(a)
+    a = CallStat.objects.all()\
+        .values('date', 'phone_dialed__organization')\
+        .annotate(total=Count('phone_dialed'))\
+        .order_by('date')\
+        .prefetch_related("phone_dialed")\
+        .filter(date__gte=timezone.now().date() - timedelta(days=2))
+
+    # print(a.query)
+
     l = []
     names = []
     tmp = {}
+
     for data in a:
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
-            tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H')
+            tmp["date"] = data["date"].strftime('%Y-%m-%d %H')
             tmp[data["phone_dialed__organization"]] = data['total']
         else:
-            if tmp["date"] == data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H'):
+            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
                 else:
@@ -73,9 +81,9 @@ def index(request):
             else:
                 l.append(tmp)
                 tmp = {}
-                tmp["date"] = data["phone_dialed__callstat__date"].strftime('%Y-%m-%d %H')
+                tmp["date"] = data["date"].strftime('%Y-%m-%d %H')
                 tmp[data["phone_dialed__organization"]] = data['total']
-
+        l.append(tmp)
     myset = set(names)
     names = list(myset)
     chart_object = generate_chart_object(names, l)
