@@ -41,5 +41,12 @@ class CallStat(models.Model):
         return self.phone_dialed.number
 
 
-class TwilioSettings(models.Model):
-    pass
+class TwilioSetting(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, to_field='username', null=True, blank=True)
+    account_sid = models.CharField(max_length=255, null=True, blank=True)
+    auth_token = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=255, null=True, blank=True)
+    meta_data = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username

@@ -2,7 +2,7 @@ from django.contrib import admin
 import csv
 from django.http import HttpResponse
 
-from call_stats.models import CeleryPhoneModel, CallStat
+from call_stats.models import CeleryPhoneModel, CallStat, TwilioSetting
 
 
 class ExportCsvMixin:
@@ -48,5 +48,10 @@ class CeleryPhoneModelAdmin(admin.ModelAdmin):
     fields = ("name", "organization", "department", "number", "purpose", "interval", "crontab", "solar", "enabled")
 
 
+class TwilioSettingAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(CallStat, CallStatAdmin)
 admin.site.register(CeleryPhoneModel, CeleryPhoneModelAdmin)
+admin.site.register(TwilioSetting, TwilioSettingAdmin)
