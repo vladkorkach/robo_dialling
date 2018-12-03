@@ -1,4 +1,5 @@
 from .models import CeleryPhoneModel
+import pandas as pd
 
 
 def chunks(l, n):
@@ -13,12 +14,35 @@ class Exporter:
         self.file_object = file_object
         self.model = CeleryPhoneModel()
         self.to_update = []
+        self.df = []
+        self.read_file()
+        data = self.parse()
+        self.process_and_save(data)
+
+    @property
+    def names(self):
+        headers = [
+            "Organization",
+            "Department",
+            "Purpose",
+            "Phone Number"
+        ]
+
+        return headers
 
     def parse(self):
-        pass
+        print(self.df)
+        for row in self.df:
+            print(self.df[row])
+        data = self.df.to_dict('records')
+        print(data)
+        return data
 
     def read_file(self):
-        pass
+        try:
+            self.df = pd.read_csv(self.file_object)
+        except BaseException:
+            print(Exception.args)
 
     def validate_data(self, row):
         if row['number'] in self.to_update:
@@ -27,6 +51,6 @@ class Exporter:
     def check_existing(self):
         self.to_update = [item for item in self.model.objects.values_list('number', flat=True)]
 
-    def process_and_save(self):
+    def process_and_save(self, data):
         self.check_existing()
         # todo loop over csv data
