@@ -8,7 +8,7 @@ def chunks(l, n):
             yield z
 
 
-class Importer:
+class Exporter:
     def __init__(self, file_object):
         self.file_object = file_object
         self.model = CeleryPhoneModel()

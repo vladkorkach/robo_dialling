@@ -8,8 +8,8 @@ from django.db.models import Count, Sum
 import json
 from datetime import timedelta
 from django.utils import timezone
-from .importer import Importer
-from .call_maker import TwilioCaller
+from .exporter import Exporter
+from .call_maker import TwilioCaller, TwilioConnecter
 
 
 def generate_chart_object(names, data):
@@ -99,14 +99,23 @@ def index(request):
 def upload_file(request):
     name = request.POST.get("db_name")
     file_obj = request.FILES['db_file']
-    Importer(file_object=file_obj)
+    Exporter(file_object=file_obj)
 
-    return redirect(reverse("admin:api_{}_changelist".format(name)))
+    return redirect("call_stats/celeryphonemodel")
 
 
 def debug_call_route(request):
-    caller = TwilioCaller(request.user.pk)
-    c = caller.make_call()
-    print(c.account_sid)
-    print(c.auth_token)
+    connecter = TwilioConnecter()
+    print(connecter.client)
+    account = connecter.client.api.accounts(connecter.sid).fetch()
+    a = account.balance.fetch()
+    print(a.balance)
+    call_list = account.calls.list()
+    for c in call_list:
+        print(c.__dict__)
+    print(account.friendly_name)
+    # caller = TwilioCaller(request.user.pk)
+    # c = caller.make_call()
+    # print(c.account_sid)
+    # print(c.auth_token)
     return HttpResponse("aaa")
