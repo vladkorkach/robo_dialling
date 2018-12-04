@@ -64,8 +64,9 @@ class Exporter:
             valid = self.check_existing(d)
             if not valid:
                 continue
-            to_db.append(
-                self.model(
+            # to_db.append(
+            try:
+                self.model.objects.create(
                     interval=schedule,
                     name="call {}".format(str(d["Phone number"])),
                     task="TwilioCaller",
@@ -75,4 +76,8 @@ class Exporter:
                     department=d["Department"],
                     purpose=d["Purpose"]
                 )
-            )
+            except Exception as e:
+                print(e.args)
+            # )
+
+        # self.model.objects.bulk_create(to_db)

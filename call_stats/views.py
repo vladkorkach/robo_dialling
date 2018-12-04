@@ -1,10 +1,9 @@
 from django.shortcuts import redirect
 from django.template import loader
-from django.urls import reverse
 
 from .models import CallStat
 from django.http import HttpResponse
-from django.db.models import Count, Sum
+from django.db.models import Count
 import json
 from datetime import timedelta
 from django.utils import timezone
