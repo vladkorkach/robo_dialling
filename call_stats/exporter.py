@@ -1,4 +1,5 @@
 from .models import CeleryPhoneModel
+from django_celery_beat.models import PeriodicTasks, IntervalSchedule
 import pandas as pd
 
 
@@ -12,12 +13,15 @@ def chunks(l, n):
 class Exporter:
     def __init__(self, file_object):
         self.file_object = file_object
-        self.model = CeleryPhoneModel()
+        self.model = CeleryPhoneModel
         self.to_update = []
         self.df = []
+        self.data_as_dict = []
         self.read_file()
         data = self.parse()
-        self.process_and_save(data)
+        self.check_existing()
+        # data = self.parse()
+        # self.process_and_save(data)
 
     @property
     def names(self):
@@ -35,7 +39,7 @@ class Exporter:
         for row in self.df:
             print(self.df[row])
         data = self.df.to_dict('records')
-        print(data)
+        self.data_as_dict = data
         return data
 
     def read_file(self):
@@ -50,7 +54,32 @@ class Exporter:
 
     def check_existing(self):
         self.to_update = [item for item in self.model.objects.values_list('number', flat=True)]
+        print(self.to_update)
+        for d in self.data_as_dict:
+            print(d["Phone number"], type(d["Phone number"]))
+            if str(d["Phone number"]) in self.to_update:
+                print("exists")
+            else:
+                pass
 
     def process_and_save(self, data):
         self.check_existing()
+        schedule, created = IntervalSchedule.objects.get_or_create(
+            every=10,
+            period=IntervalSchedule.SECONDS
+        )
+        to_db = []
+        for d in self.data_as_dict:
+            to_db.append(
+                self.model(
+                    interval=schedule,
+                    name="",
+                    task="",
+                    enabled=False,
+                    number=d["Phone number"],
+                    organization=d["Organization"],
+                    department=d["department"],
+                    purpose=d["Purpose"]
+                )
+            )
         # todo loop over csv data
