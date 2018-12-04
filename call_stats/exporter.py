@@ -1,5 +1,5 @@
 from .models import CeleryPhoneModel
-from django_celery_beat.models import PeriodicTasks, IntervalSchedule
+from django_celery_beat.models import IntervalSchedule
 import pandas as pd
 
 

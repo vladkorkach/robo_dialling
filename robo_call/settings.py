@@ -119,6 +119,12 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 BEAT_SYNC_EVERY = 1
 
 
+# Twilio settings
+TWILIO_AUTH_TOKEN = ""
+TWILIO_SID = ""
+TWILIO_ROOT_URL = "https://api.twilio.com/"
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 

@@ -44,3 +44,8 @@ def make_twilio_call(*args, **kwargs):
         infos.append(info)
 
     CallStat.objects.bulk_create(infos)
+
+
+@shared_task(name="SyncWithTwilioStats")
+def sync_with_twilio_stats(*args, **kwargs):
+    pass

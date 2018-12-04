@@ -85,9 +85,7 @@ def index(request):
     chart_object = generate_chart_object(names, l)
 
     connecter = TwilioConnecter()
-    account = connecter.client.api.accounts(connecter.sid).fetch()
-    a = account.balance.fetch()
-    balance = a.balance
+    balance = connecter.get_balance()
 
     context = {
         "chart": json.dumps(chart_object),
@@ -107,18 +105,13 @@ def upload_file(request):
     return redirect("call_stats/celeryphonemodel")
 
 
+def twilio_callback(request):
+    pass
+
+
 def debug_call_route(request):
     connecter = TwilioConnecter()
-    print(connecter.client)
-    account = connecter.client.api.accounts(connecter.sid).fetch()
-    a = account.balance.fetch()
-    print(a.balance)
-    call_list = account.calls.list()
-    for c in call_list:
-        print(c.__dict__)
-    print(account.friendly_name)
-    # caller = TwilioCaller(request.user.pk)
-    # c = caller.make_call()
-    # print(c.account_sid)
-    # print(c.auth_token)
+    call_list = connecter.get_calls_list()
+    print(call_list)
+    # todo find in db by sid to update
     return HttpResponse("debug only")
