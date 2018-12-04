@@ -53,16 +53,12 @@ def index(request):
 
     week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
 
-    # print(week_count)
-
     a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\
         .annotate(total=Count('phone_dialed'))\
         .order_by('date')\
         .prefetch_related("phone_dialed")\
         .filter(date__gte=timezone.now().date() - timedelta(days=2))
-
-    # print(a.query)
 
     l = []
     names = []
@@ -88,18 +84,26 @@ def index(request):
     myset = set(names)
     names = list(myset)
     chart_object = generate_chart_object(names, l)
+
+    connecter = TwilioConnecter()
+    account = connecter.client.api.accounts(connecter.sid).fetch()
+    a = account.balance.fetch()
+    balance = a.balance
+
     context = {
         "chart": json.dumps(chart_object),
-        "twilio_balance": 0,
+        "twilio_balance": "{}".format(str(balance)),
         "total_this_week": week_count
     }
     return HttpResponse(template.render(context, request))
 
 
 def upload_file(request):
-    name = request.POST.get("db_name")
     file_obj = request.FILES['db_file']
-    Exporter(file_object=file_obj)
+    try:
+        Exporter(file_object=file_obj)
+    except BaseException as e:
+        print(e.args)
 
     return redirect("call_stats/celeryphonemodel")
 

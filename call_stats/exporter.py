@@ -18,10 +18,8 @@ class Exporter:
         self.df = []
         self.data_as_dict = []
         self.read_file()
-        data = self.parse()
-        self.check_existing()
-        # data = self.parse()
-        # self.process_and_save(data)
+        self.parse_and_convert()
+        self.process_and_save()
 
     @property
     def names(self):
@@ -34,13 +32,9 @@ class Exporter:
 
         return headers
 
-    def parse(self):
-        print(self.df)
-        for row in self.df:
-            print(self.df[row])
+    def parse_and_convert(self):
         data = self.df.to_dict('records')
         self.data_as_dict = data
-        return data
 
     def read_file(self):
         try:
@@ -52,34 +46,33 @@ class Exporter:
         if row['number'] in self.to_update:
             return False
 
-    def check_existing(self):
+    def check_existing(self, row):
         self.to_update = [item for item in self.model.objects.values_list('number', flat=True)]
-        print(self.to_update)
-        for d in self.data_as_dict:
-            print(d["Phone number"], type(d["Phone number"]))
-            if str(d["Phone number"]) in self.to_update:
-                print("exists")
-            else:
-                pass
+        valid = True
+        if str(row) in self.to_update:
+            valid = False
 
-    def process_and_save(self, data):
-        self.check_existing()
+        return valid
+
+    def process_and_save(self):
         schedule, created = IntervalSchedule.objects.get_or_create(
             every=10,
             period=IntervalSchedule.SECONDS
         )
         to_db = []
         for d in self.data_as_dict:
+            valid = self.check_existing(d)
+            if not valid:
+                continue
             to_db.append(
                 self.model(
                     interval=schedule,
-                    name="",
-                    task="",
+                    name="call {}".format(str(d["Phone number"])),
+                    task="TwilioCaller",
                     enabled=False,
-                    number=d["Phone number"],
-                    organization=d["Organization"],
-                    department=d["department"],
+                    number=str(d["Phone number"]),
+                    organization=d["Organisation"],
+                    department=d["Department"],
                     purpose=d["Purpose"]
                 )
             )
-        # todo loop over csv data
