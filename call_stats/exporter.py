@@ -59,12 +59,12 @@ class Exporter:
             every=10,
             period=IntervalSchedule.SECONDS
         )
-        to_db = []
+
         for d in self.data_as_dict:
             valid = self.check_existing(d)
             if not valid:
                 continue
-            # to_db.append(
+
             try:
                 self.model.objects.create(
                     interval=schedule,
@@ -78,6 +78,3 @@ class Exporter:
                 )
             except Exception as e:
                 print(e.args)
-            # )
-
-        # self.model.objects.bulk_create(to_db)

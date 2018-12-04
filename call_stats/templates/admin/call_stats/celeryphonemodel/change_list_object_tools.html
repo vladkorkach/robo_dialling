@@ -9,6 +9,28 @@
     </a>
   </li>
   <li>
+      <style>
+        #importform{
+            display: none;
+        }
+        #image_drop{
+            background-image: url('../img/tooltag-add.svg');
+            background-repeat: no-repeat;
+            background-position: right 7px center;
+            border-radius: 15px;
+            display: block;
+            float: left;
+            padding: 3px 12px;
+            background: #999;
+            font-weight: 400;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #fff;
+            line-height: 20px;
+        }
+      </style>
+      <button id="image_drop" onclick="document.getElementById('parse_file').click()" title="Upload numbers">Upload numbers</button>
       <form enctype="multipart/form-data" action="/admin/file" method="post" id="importform">
         {% csrf_token %}
           <input type="hidden" name="db_export" value="phone_numbers">
@@ -19,6 +41,7 @@
               }
           </script>
       </form>
+
   </li>
   {% endif %}
 {% endblock %}
