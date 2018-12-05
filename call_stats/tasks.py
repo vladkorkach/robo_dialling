@@ -4,6 +4,7 @@ from celery import shared_task, task
 import random
 from .models import CeleryPhoneModel, CallStat
 import logging
+from .call_maker import TwilioConnecter
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -45,7 +46,38 @@ def make_twilio_call(*args, **kwargs):
 
     CallStat.objects.bulk_create(infos)
 
+    # """something like first time call make. We get only sid from twilio."""
+    # connecter = TwilioConnecter()
+    # call_list = connecter.get_calls_list()
+    # hardcoded_numbers = ["12094397527", "27780142469", "27216851846"]
+    # sids = {}
+    # for number in hardcoded_numbers:
+    #     for data in call_list:
+    #         if re.sub("[^0-9]", "", data["to"]) == number:
+    #             print(data["to"], data["sid"], re.sub("[^0-9]", "", data["to"]))
+    #             sids[re.sub("[^0-9]", "", data["to"])] = data["sid"]
+    #
+    # numbers = CeleryPhoneModel.objects.filter(number__in=hardcoded_numbers)
+    # infos = []
+    # print(sids)
+    # for number in numbers:
+    #     print(number)
+    #     info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
+    #     infos.append(info)
+    # # print(infos)
+    # CallStat.objects.bulk_create(infos)
+
 
 @shared_task(name="SyncWithTwilioStats")
 def sync_with_twilio_stats(*args, **kwargs):
-    pass
+    connecter = TwilioConnecter()
+    kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
+    calls = connecter.get_calls_list(**kw)
+    print(calls)
+    for c in calls:
+        call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+        if call_stat:
+            call_stat.time_before_hang = c["duration"]
+            call_stat.status = c["status"]
+            print(call_stat.__dict__)
+            # call_stat.save()

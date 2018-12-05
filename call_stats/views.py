@@ -6,7 +6,7 @@ from .models import CallStat, CeleryPhoneModel
 from django.http import HttpResponse
 from django.db.models import Count
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from .exporter import Exporter
 from .call_maker import TwilioCaller, TwilioConnecter
@@ -107,14 +107,13 @@ def upload_file(request):
 
 
 def twilio_callback(request):
-    sid = request.GET["CallSid"]
-    to = request.GET["To"]
-    status = request.GET["CallStatus"]
+    sid = request.POST["CallSid"]
+    to = request.POST["To"]
+    status = request.POST["CallStatus"]
 
     connecter = TwilioConnecter()
     call_info = connecter.get_call_info(sid)
 
-    print(call_info.duration)
     call_stat = CallStat.objects.filter(sid=sid).first()
     call_stat.time_before_hang = call_info.duration
     call_stat.status = status
@@ -144,6 +143,19 @@ def debug_call_route(request):
             infos.append(info)
         # print(infos)
         CallStat.objects.bulk_create(infos)
+    elif request.GET["action"] == "synchronize":
+        connecter = TwilioConnecter()
+        kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
+        calls = connecter.get_calls_list(**kw)
+        print(calls)
+        for c in calls:
+            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+            if call_stat:
+                call_stat.time_before_hang = c["duration"]
+                call_stat.status = c["status"]
+                print(call_stat.__dict__)
+                # call_stat.save()
+
     else:
         sid = request.GET["CallSid"]
         to = request.GET["To"]
@@ -158,7 +170,6 @@ def debug_call_route(request):
         call_stat.status = status
 
         call_stat.save()
-
 
         # call_twilio_info =
     return HttpResponse("debug only")

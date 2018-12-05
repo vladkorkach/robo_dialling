@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from twilio.rest import Client
 from .models import TwilioSetting
 from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL
@@ -15,8 +17,14 @@ class TwilioConnecter:
         data = self.account.balance.fetch()
         return data.balance
 
-    def get_calls_list(self):
-        call_list = self.account.calls.list()
+    def get_calls_list(self, **kwargs):
+        if 'start_time_after' in kwargs and 'start_time_before' in kwargs:
+            after = datetime.strptime(kwargs["start_time_after"], "%Y-%m-%d")
+            before = datetime.strptime(kwargs["start_time_before"], "%Y-%m-%d")
+            call_list = self.account.calls.list(start_time_after=datetime(after.year, after.month, after.day, 0, 0),
+                                                start_time_before=datetime(before.year, before.month, before.day, 0, 0))
+        else:
+            call_list = self.account.calls.list()
         calls_list_info = []
         for c in call_list:
             print(c.date_created, c.date_updated, c.duration, c.end_time, c.start_time)
