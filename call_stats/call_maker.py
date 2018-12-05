@@ -33,6 +33,9 @@ class TwilioConnecter:
             calls_list_info.append(tmp)
         return calls_list_info
 
+    def get_call_info(self, sid):
+        return self.client.calls(sid).fetch()
+
 
 class TwilioCaller:
     def __init__(self, client: Client):

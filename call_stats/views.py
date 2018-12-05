@@ -107,7 +107,19 @@ def upload_file(request):
 
 
 def twilio_callback(request):
-    pass
+    sid = request.GET["CallSid"]
+    to = request.GET["To"]
+    status = request.GET["CallStatus"]
+
+    connecter = TwilioConnecter()
+    call_info = connecter.get_call_info(sid)
+
+    print(call_info.duration)
+    call_stat = CallStat.objects.filter(sid=sid).first()
+    call_stat.time_before_hang = call_info.duration
+    call_stat.status = status
+
+    call_stat.save()
 
 
 def debug_call_route(request):
@@ -133,15 +145,20 @@ def debug_call_route(request):
         # print(infos)
         CallStat.objects.bulk_create(infos)
     else:
-        pass
+        sid = request.GET["CallSid"]
+        to = request.GET["To"]
+        status = request.GET["CallStatus"]
 
-    # for number in call_list:
-    #     info = CallStat(
-    #         phone_dialed=number["to"],
-    #         time_before_hang=number["duration"],
-    #         sid=number["sid"])
-    #     infos.append(info)
+        connecter = TwilioConnecter()
+        call_info = connecter.get_call_info(sid)
 
-    # CallStat.objects.bulk_create(infos)
-    # todo find in db by sid to update
+        print(call_info.duration)
+        call_stat = CallStat.objects.filter(sid=sid).first()
+        call_stat.time_before_hang = call_info.duration
+        call_stat.status = status
+
+        call_stat.save()
+
+
+        # call_twilio_info =
     return HttpResponse("debug only")
