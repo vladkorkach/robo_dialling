@@ -1,7 +1,8 @@
 from django.shortcuts import redirect
 from django.template import loader
+import re
 
-from .models import CallStat
+from .models import CallStat, CeleryPhoneModel
 from django.http import HttpResponse
 from django.db.models import Count
 import json
@@ -110,8 +111,37 @@ def twilio_callback(request):
 
 
 def debug_call_route(request):
-    connecter = TwilioConnecter()
-    call_list = connecter.get_calls_list()
-    print(call_list)
+    if request.GET["action"] == "simulate_cron":
+        """something like first time call make. We get only sid from twilio."""
+        connecter = TwilioConnecter()
+        call_list = connecter.get_calls_list()
+        hardcoded_numbers = ["12094397527", "27780142469", "27216851846"]
+        sids = {}
+        for number in hardcoded_numbers:
+            for data in call_list:
+                if re.sub("[^0-9]", "", data["to"]) == number:
+                    print(data["to"], data["sid"], re.sub("[^0-9]", "", data["to"]))
+                    sids[re.sub("[^0-9]", "", data["to"])] = data["sid"]
+
+        numbers = CeleryPhoneModel.objects.filter(number__in=hardcoded_numbers)
+        infos = []
+        print(sids)
+        for number in numbers:
+            print(number)
+            info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
+            infos.append(info)
+        # print(infos)
+        CallStat.objects.bulk_create(infos)
+    else:
+        pass
+
+    # for number in call_list:
+    #     info = CallStat(
+    #         phone_dialed=number["to"],
+    #         time_before_hang=number["duration"],
+    #         sid=number["sid"])
+    #     infos.append(info)
+
+    # CallStat.objects.bulk_create(infos)
     # todo find in db by sid to update
     return HttpResponse("debug only")

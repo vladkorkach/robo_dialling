@@ -35,6 +35,9 @@ class CallStat(models.Model):
     phone_dialed = models.ForeignKey(CeleryPhoneModel, null=True, blank=True, on_delete=models.CASCADE)
     time_before_hang = models.IntegerField()
     phone_is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=255, null=True, blank=True)
+    sid = models.CharField(max_length=255, null=True, blank=True)
+    duration=models.CharField(max_length=255,null=True, blank=True)
     date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -46,7 +49,6 @@ class TwilioSetting(models.Model):
     account_sid = models.CharField(max_length=255, null=True, blank=True)
     auth_token = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
-    call_status = models.CharField(max_length=255, null=True, blank=True)
     meta_data = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):

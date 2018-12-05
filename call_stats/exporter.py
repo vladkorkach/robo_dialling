@@ -76,5 +76,6 @@ class Exporter:
                     department=d["Department"],
                     purpose=d["Purpose"]
                 )
+
             except Exception as e:
                 print(e.args)

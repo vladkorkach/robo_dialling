@@ -26,8 +26,8 @@ class ExportCsvMixin:
 
 
 class CallStatAdmin(admin.ModelAdmin, ExportCsvMixin):
-    list_display = ("phone_dialed", "time_before_hang", "date", "get_department", "get_organization")
-    list_filter = ("phone_dialed", "time_before_hang", "date", "phone_dialed__organization", "phone_dialed__organization")
+    list_display = ("phone_dialed", "time_before_hang", "status", "date", "get_department", "get_organization")
+    list_filter = ("phone_dialed", "time_before_hang", "status", "date", "phone_dialed__organization", "phone_dialed__organization")
     actions = ["export_as_csv"]
 
     def get_department(self, obj):

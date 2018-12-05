@@ -27,7 +27,8 @@ class TwilioConnecter:
                 "price": c.price,
                 "status": c.status,
                 "start_time": c.start_time,
-                "end_time": c.end_time
+                "end_time": c.end_time,
+                "to": c.to
             }
             calls_list_info.append(tmp)
         return calls_list_info
