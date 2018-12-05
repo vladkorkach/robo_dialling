@@ -50,9 +50,10 @@ class TwilioCaller:
         self.client = client
 
     def make_call(self):
+        root_url = ""
         call = self.client.calls.create(
             method="GET",
-            status_callback="",
+            status_callback="{}/call_stats/callback".format(root_url),
             status_callback_event=["answered", "completed"],
             status_callback_method="POST",
             url="",

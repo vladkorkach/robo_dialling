@@ -46,7 +46,7 @@ def make_twilio_call(*args, **kwargs):
 
     CallStat.objects.bulk_create(infos)
 
-    # """something like first time call make. We get only sid from twilio."""
+    # """something like first time call make. We get only sid from twilio. Uncomment for real numbers"""
     # connecter = TwilioConnecter()
     # call_list = connecter.get_calls_list()
     # hardcoded_numbers = ["12094397527", "27780142469", "27216851846"]
@@ -70,7 +70,9 @@ def make_twilio_call(*args, **kwargs):
 
 @shared_task(name="SyncWithTwilioStats")
 def sync_with_twilio_stats(*args, **kwargs):
+    """need if callbacks will not work correctly"""
     connecter = TwilioConnecter()
+    """set this data to task kwargs"""
     kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
     calls = connecter.get_calls_list(**kw)
     print(calls)
