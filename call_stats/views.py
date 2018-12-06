@@ -122,29 +122,7 @@ def twilio_callback(request):
 
 
 def debug_call_route(request):
-    """only for local development"""
-    if request.GET["action"] == "simulate_cron":
-        """something like first time call make. We get only sid from twilio."""
-        connecter = TwilioConnecter()
-        call_list = connecter.get_calls_list()
-        hardcoded_numbers = ["12094397527", "27780142469", "27216851846"]
-        sids = {}
-        for number in hardcoded_numbers:
-            for data in call_list:
-                if re.sub("[^0-9]", "", data["to"]) == number:
-                    print(data["to"], data["sid"], re.sub("[^0-9]", "", data["to"]))
-                    sids[re.sub("[^0-9]", "", data["to"])] = data["sid"]
-
-        numbers = CeleryPhoneModel.objects.filter(number__in=hardcoded_numbers)
-        infos = []
-        print(sids)
-        for number in numbers:
-            print(number)
-            info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
-            infos.append(info)
-        # print(infos)
-        CallStat.objects.bulk_create(infos)
-    elif request.GET["action"] == "synchronize":
+    if request.GET["action"] == "synchronize":
         connecter = TwilioConnecter()
         print(connecter.client.username)
         kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
@@ -162,13 +140,23 @@ def debug_call_route(request):
         #         # call_stat.save()
 
     elif request.GET["action"] == "test_call":
+        number = "15005550009"
         connecter = TwilioConnecter()
         caller = TwilioCaller(connecter.client)
-        data = caller.make_call(number="15005550009")
+        data = caller.make_call(number=number)
+
+        # for number in numbers:
+        #     print(number)
+        #     info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
+        #     infos.append(info)
+
+        # CallStat.objects.bulk_create(infos)
+
         if data[0]:
-            print("success")
+            CallStat(phone_dialed=number, time_before_hang=0, sid=data[0].sid, status=data[0].status)
         else:
-            print("error")
+            debug_info = json.dumps(data[1])
+            CallStat(phone_dialed=number, debug_info=debug_info, time_before_hang=0, sid=None, status="wrong")
 
     else:
         sid = request.GET["CallSid"]

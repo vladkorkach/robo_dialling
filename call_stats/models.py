@@ -37,7 +37,8 @@ class CallStat(models.Model):
     phone_is_active = models.BooleanField(default=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     sid = models.CharField(max_length=255, null=True, blank=True)
-    duration=models.CharField(max_length=255,null=True, blank=True)
+    duration = models.CharField(max_length=255, null=True, blank=True)
+    debug_info = models.TextField(null=True, blank=True)
     date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -49,7 +50,6 @@ class TwilioSetting(models.Model):
     account_sid = models.CharField(max_length=255, null=True, blank=True)
     auth_token = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
-    meta_data = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.user.username
