@@ -125,6 +125,10 @@ TWILIO_SID = ""
 TWILIO_ROOT_URL = "https://api.twilio.com/"
 
 
+TWILIO_SID = "ACada4efaa7fcfa63fa1844812798cb0f6"
+TWILIO_AUTH_TOKEN = "cabaedc73d9c50e76758c5fc4299839b"
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 

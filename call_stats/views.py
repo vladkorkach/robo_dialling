@@ -146,16 +146,29 @@ def debug_call_route(request):
         CallStat.objects.bulk_create(infos)
     elif request.GET["action"] == "synchronize":
         connecter = TwilioConnecter()
+        print(connecter.client.username)
         kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
-        calls = connecter.get_calls_list(**kw)
-        print(calls)
-        for c in calls:
-            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-            if call_stat:
-                call_stat.time_before_hang = c["duration"]
-                call_stat.status = c["status"]
-                print(call_stat.__dict__)
-                # call_stat.save()
+        # try:
+        #     calls = connecter.get_calls_list(**kw)
+        #     print(calls)
+        # except Exception as e:
+        #     print(e.args)
+        # for c in calls:
+        #     call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+        #     if call_stat:
+        #         call_stat.time_before_hang = c["duration"]
+        #         call_stat.status = c["status"]
+        #         print(call_stat.__dict__)
+        #         # call_stat.save()
+
+    elif request.GET["action"] == "test_call":
+        connecter = TwilioConnecter()
+        caller = TwilioCaller(connecter.client)
+        data = caller.make_call(number="15005550009")
+        if data[0]:
+            print("success")
+        else:
+            print("error")
 
     else:
         sid = request.GET["CallSid"]

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 from .models import TwilioSetting
 from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL
@@ -11,7 +12,12 @@ class TwilioConnecter:
         self.sid = TWILIO_SID
         self.client = Client(self.sid, self.auth_token)
         self.root_url = TWILIO_ROOT_URL
-        self.account = self.client.api.accounts(self.sid).fetch()
+        self.account = None
+
+    def get_account_info(self):
+        if not self.account:
+            self.account = self.client.api.accounts(self.sid).fetch()
+        return self.account
 
     def get_balance(self):
         data = self.account.balance.fetch()
@@ -49,14 +55,31 @@ class TwilioCaller:
 
     def make_call(self, number):
         root_url = BASE_URL
-        call = self.client.calls.create(
-            method="GET",
-            status_callback="{}call_stats/callback".format(root_url),
-            status_callback_event=["answered", "completed"],
-            status_callback_method="POST",
-            url="http://demo.twilio.com/docs/voice.xml",
-            to=number,
-            from_=""
-        )
+        call = None
+        e = None
+        try:
+            call = self.client.calls.create(
+                method="GET",
+                status_callback="{}call_stats/callback".format(root_url),
+                status_callback_event=["answered", "completed"],
+                status_callback_method="POST",
+                url="http://demo.twilio.com/docs/voice.xml",
+                to=number,
+                from_="15005550006"
+            )
+        except TwilioRestException as e:
+            print(e.code)
+            print(e.method)
+            print(e.uri)
+            print(e.status)
 
-        return call.sid
+        print(call.status)
+        print(call.sid)
+        print(call.__dict__)
+
+        if not call:
+            response = [None, e]
+        else:
+            response = [call, None]
+
+        return response
