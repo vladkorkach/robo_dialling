@@ -152,11 +152,18 @@ def debug_call_route(request):
 
         # CallStat.objects.bulk_create(infos)
 
+        number_model = CeleryPhoneModel.objects.filter(number=number).first()
+
         if data[0]:
-            CallStat(phone_dialed=number, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+            call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
         else:
-            debug_info = json.dumps(data[1])
-            CallStat(phone_dialed=number, debug_info=debug_info, time_before_hang=0, sid=None, status="wrong")
+            stat = True
+            if data[1].phone_status:
+                stat = False
+            debug_info = json.dumps(data[1].__dict__)
+            call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat, sid=None, status="wrong")
+
+        call_stat.save()
 
     else:
         sid = request.GET["CallSid"]

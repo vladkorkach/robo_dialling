@@ -56,7 +56,7 @@ class TwilioCaller:
     def make_call(self, number):
         root_url = BASE_URL
         call = None
-        e = None
+        err = None
         try:
             call = self.client.calls.create(
                 method="GET",
@@ -68,17 +68,20 @@ class TwilioCaller:
                 from_="15005550006"
             )
         except TwilioRestException as e:
-            print(e.code)
-            print(e.method)
-            print(e.uri)
-            print(e.status)
+            # print(e.code)
+            # print(e.method)
+            # print(e.uri)
+            # print(e.status)
+            if e.code in [21217, 21214, 21216]:
+                e.__setattr__("phone_status", "invalid")
+            err = e
 
-        print(call.status)
-        print(call.sid)
-        print(call.__dict__)
+        # print(call.status)
+        # print(call.sid)
+        # print(call.__dict__)
 
         if not call:
-            response = [None, e]
+            response = [None, err]
         else:
             response = [call, None]
 
