@@ -6,23 +6,36 @@ from .models import TwilioSetting
 from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL
 
 
+def test_check(func):
+    def _decorator(self):
+        if self.test_mode:
+            res = False
+        else:
+            res = func(self)
+        return res
+    return _decorator
+
+
 class TwilioConnecter:
     def __init__(self):
+        self.test_mode = True
         self.auth_token = TWILIO_AUTH_TOKEN
         self.sid = TWILIO_SID
         self.client = Client(self.sid, self.auth_token)
         self.root_url = TWILIO_ROOT_URL
         self.account = None
 
+    @test_check
     def get_account_info(self):
-        if not self.account:
-            self.account = self.client.api.accounts(self.sid).fetch()
+        self.account = self.client.api.accounts(self.sid).fetch()
         return self.account
 
+    @test_check
     def get_balance(self):
         data = self.account.balance.fetch()
         return data.balance
 
+    @test_check
     def get_calls_list(self, **kwargs):
         if 'start_time_after' in kwargs and 'start_time_before' in kwargs:
             after = datetime.strptime(kwargs["start_time_after"], "%Y-%m-%d")
