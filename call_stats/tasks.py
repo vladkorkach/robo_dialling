@@ -1,10 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 import celery
 from celery import shared_task, task
-import random
 from .models import CeleryPhoneModel, CallStat
 import logging
-from .call_maker import TwilioConnecter
+from .call_maker import TwilioConnecter, TwilioCaller
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -39,33 +38,22 @@ class TaskWrapper(celery.Task):
 def make_twilio_call(*args, **kwargs):
     numbers = CeleryPhoneModel.objects.filter(id__in=args)
     infos = []
-
+    connecter = TwilioConnecter()
+    caller = TwilioCaller(connecter.client)
+    print(caller)
     for number in numbers:
-        info = CallStat(phone_dialed=number, time_before_hang=random.randint(0, 9))
+        sid = None
+        try:
+            sid = caller.make_call(number.number)
+        except Exception as e:
+            print(e.args)
+        if not sid:
+            info = CallStat(phone_dialed=number, time_before_hang=0, sid="error", status="wrong")
+        else:
+            info = CallStat(phone_dialed=number, time_before_hang=0, sid=sid, status="sended")
         infos.append(info)
 
     CallStat.objects.bulk_create(infos)
-
-    # """something like first time call make. We get only sid from twilio. Uncomment for real numbers"""
-    # connecter = TwilioConnecter()
-    # call_list = connecter.get_calls_list()
-    # hardcoded_numbers = ["12094397527", "27780142469", "27216851846"]
-    # sids = {}
-    # for number in hardcoded_numbers:
-    #     for data in call_list:
-    #         if re.sub("[^0-9]", "", data["to"]) == number:
-    #             print(data["to"], data["sid"], re.sub("[^0-9]", "", data["to"]))
-    #             sids[re.sub("[^0-9]", "", data["to"])] = data["sid"]
-    #
-    # numbers = CeleryPhoneModel.objects.filter(number__in=hardcoded_numbers)
-    # infos = []
-    # print(sids)
-    # for number in numbers:
-    #     print(number)
-    #     info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
-    #     infos.append(info)
-    # # print(infos)
-    # CallStat.objects.bulk_create(infos)
 
 
 @shared_task(name="SyncWithTwilioStats")

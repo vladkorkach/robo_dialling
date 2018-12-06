@@ -139,6 +139,9 @@ USE_L10N = True
 USE_TZ = True
 
 
+BASE_URL = "http://ec2-54-242-81-133.compute-1.amazonaws.com:8080/"
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 

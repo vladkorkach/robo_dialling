@@ -52,13 +52,13 @@ def index(request):
     monday_of_this_week = monday_of_last_week + timedelta(days=7)
 
     week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
-    # todo add status check
+
     a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\
         .annotate(total=Count('phone_dialed'))\
         .order_by('date')\
         .prefetch_related("phone_dialed")\
-        .filter(date__gte=timezone.now().date() - timedelta(days=2))
+        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["sended", "wrong"])
 
     l = []
     names = []

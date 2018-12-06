@@ -2,7 +2,7 @@ from datetime import datetime
 
 from twilio.rest import Client
 from .models import TwilioSetting
-from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL
+from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL
 
 
 class TwilioConnecter:
@@ -27,8 +27,6 @@ class TwilioConnecter:
             call_list = self.account.calls.list()
         calls_list_info = []
         for c in call_list:
-            print(c.date_created, c.date_updated, c.duration, c.end_time, c.start_time)
-            print("!!", c.end_time - c.start_time)
             tmp = {
                 "sid": c.sid,
                 "duration": c.duration,
@@ -49,15 +47,16 @@ class TwilioCaller:
     def __init__(self, client: Client):
         self.client = client
 
-    def make_call(self):
-        root_url = ""
+    def make_call(self, number):
+        root_url = BASE_URL
         call = self.client.calls.create(
             method="GET",
-            status_callback="{}/call_stats/callback".format(root_url),
+            status_callback="{}call_stats/callback".format(root_url),
             status_callback_event=["answered", "completed"],
             status_callback_method="POST",
-            url="",
-            to="",
+            url="http://demo.twilio.com/docs/voice.xml",
+            to=number,
             from_=""
         )
-        print(call.sid)
+
+        return call.sid
