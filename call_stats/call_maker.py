@@ -55,11 +55,13 @@ class TwilioConnecter:
                 "status": c.status,
                 "start_time": c.start_time,
                 "end_time": c.end_time,
-                "to": c.to
+                "to": c.to,
+                "from_": c.from_,
             }
             calls_list_info.append(tmp)
         return calls_list_info
 
+    @test_check
     def get_call_info(self, sid):
         return self.client.calls(sid).fetch()
 

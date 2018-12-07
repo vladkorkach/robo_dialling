@@ -114,11 +114,14 @@ def twilio_callback(request):
     connecter = TwilioConnecter()
     call_info = connecter.get_call_info(sid)
 
-    call_stat = CallStat.objects.filter(sid=sid).first()
-    call_stat.time_before_hang = call_info.duration
-    call_stat.status = status
-
-    call_stat.save()
+    if call_info:
+        call_stat = CallStat.objects.filter(sid=sid).first()
+        call_stat.time_before_hang = call_info.duration
+        call_stat.status = status
+    else:
+        call_stat = CallStat.objects.filter(sid=sid).first()
+        call_stat.status = status
+        call_stat.save()
 
 
 def debug_call_route(request):
@@ -169,9 +172,10 @@ def debug_call_route(request):
         connecter = TwilioConnecter()
         call_info = connecter.get_call_info(sid)
 
-        call_stat = CallStat.objects.filter(sid=sid).first()
-        call_stat.time_before_hang = call_info.duration
-        call_stat.status = status
+        if call_info:
+            call_stat = CallStat.objects.filter(sid=sid).first()
+            call_stat.time_before_hang = call_info.duration
+            call_stat.status = status
 
-        call_stat.save()
+            call_stat.save()
     return HttpResponse("debug only")
