@@ -177,5 +177,9 @@ def debug_call_route(request):
             call_stat.time_before_hang = call_info.duration
             call_stat.status = status
 
-            call_stat.save()
+        else:
+            call_stat = CallStat.objects.filter(sid=sid).first()
+            call_stat.status = status
+
+        call_stat.save()
     return HttpResponse("debug only")

@@ -2,8 +2,7 @@ from datetime import datetime
 
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
-from .models import TwilioSetting
-from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL
+from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL, TWILIO_FROM_NUMBER
 
 
 def test_check(func):
@@ -45,8 +44,6 @@ class TwilioConnecter:
         else:
             call_list = self.account.calls.list()
         calls_list_info = []
-        print(self.account)
-        print(call_list)
         for c in call_list:
             tmp = {
                 "sid": c.sid,
@@ -74,6 +71,7 @@ class TwilioCaller:
         root_url = BASE_URL
         call = None
         err = None
+
         try:
             call = self.client.calls.create(
                 method="GET",
@@ -82,20 +80,13 @@ class TwilioCaller:
                 status_callback_method="POST",
                 url="http://demo.twilio.com/docs/voice.xml",
                 to=number,
-                from_="15005550006"
+                from_=TWILIO_FROM_NUMBER,
+                timeout=25
             )
         except TwilioRestException as e:
-            # print(e.code)
-            # print(e.method)
-            # print(e.uri)
-            # print(e.status)
             if e.code in [21217, 21214, 21216]:
                 e.__setattr__("phone_status", "invalid")
             err = e
-
-        # print(call.status)
-        # print(call.sid)
-        # print(call.__dict__)
 
         if not call:
             response = [None, err]
