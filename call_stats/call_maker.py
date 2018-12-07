@@ -17,7 +17,7 @@ def test_check(func):
 
 class TwilioConnecter:
     def __init__(self):
-        self.test_mode = True
+        self.test_mode = False
         self.auth_token = TWILIO_AUTH_TOKEN
         self.sid = TWILIO_SID
         self.client = Client(self.sid, self.auth_token)
