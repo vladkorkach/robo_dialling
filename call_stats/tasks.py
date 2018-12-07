@@ -1,4 +1,7 @@
 from __future__ import absolute_import, unicode_literals
+
+import json
+
 import celery
 from celery import shared_task, task
 from .models import CeleryPhoneModel, CallStat
@@ -37,23 +40,25 @@ class TaskWrapper(celery.Task):
 @shared_task(name='TwilioCaller', base=TaskWrapper)
 def make_twilio_call(*args, **kwargs):
     numbers = CeleryPhoneModel.objects.filter(id__in=args)
-    infos = []
+    # infos = []
     connecter = TwilioConnecter()
     caller = TwilioCaller(connecter.client)
-    print(caller)
-    for number in numbers:
-        sid = None
-        try:
-            sid = caller.make_call(number.number)
-        except Exception as e:
-            print(e.args)
-        if not sid:
-            info = CallStat(phone_dialed=number, time_before_hang=0, sid="error", status="wrong")
-        else:
-            info = CallStat(phone_dialed=number, time_before_hang=0, sid=sid, status="sended")
-        infos.append(info)
 
-    CallStat.objects.bulk_create(infos)
+    for number_model in numbers:
+        data = caller.make_call(number=number_model.number)
+
+        if data[0]:
+            call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+        else:
+            stat = True
+            if data[1].phone_status:
+                stat = False
+            debug_info = json.dumps(data[1].__dict__)
+            call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat, sid=None, status="wrong")
+
+        call_stat.save()
+
+    # CallStat.objects.bulk_create(infos)
 
 
 @shared_task(name="SyncWithTwilioStats")
