@@ -7,7 +7,7 @@ from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, B
 
 
 def test_check(func):
-    def _decorator(self):
+    def _decorator(self, *args, **kwargs):
         if self.test_mode:
             res = False
         else:
@@ -23,12 +23,11 @@ class TwilioConnecter:
         self.sid = TWILIO_SID
         self.client = Client(self.sid, self.auth_token)
         self.root_url = TWILIO_ROOT_URL
-        self.account = None
+        self.account = self.get_account_info()
 
     @test_check
     def get_account_info(self):
-        self.account = self.client.api.accounts(self.sid).fetch()
-        return self.account
+        return self.client.api.accounts(self.sid).fetch()
 
     @test_check
     def get_balance(self):
@@ -40,11 +39,14 @@ class TwilioConnecter:
         if 'start_time_after' in kwargs and 'start_time_before' in kwargs:
             after = datetime.strptime(kwargs["start_time_after"], "%Y-%m-%d")
             before = datetime.strptime(kwargs["start_time_before"], "%Y-%m-%d")
+
             call_list = self.account.calls.list(start_time_after=datetime(after.year, after.month, after.day, 0, 0),
                                                 start_time_before=datetime(before.year, before.month, before.day, 0, 0))
         else:
             call_list = self.account.calls.list()
         calls_list_info = []
+        print(self.account)
+        print(call_list)
         for c in call_list:
             tmp = {
                 "sid": c.sid,

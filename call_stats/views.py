@@ -126,31 +126,27 @@ def debug_call_route(request):
         connecter = TwilioConnecter()
         print(connecter.client.username)
         kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
-        # try:
-        #     calls = connecter.get_calls_list(**kw)
-        #     print(calls)
-        # except Exception as e:
-        #     print(e.args)
-        # for c in calls:
-        #     call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-        #     if call_stat:
-        #         call_stat.time_before_hang = c["duration"]
-        #         call_stat.status = c["status"]
-        #         print(call_stat.__dict__)
-        #         # call_stat.save()
+        calls = None
+        try:
+            calls = connecter.get_calls_list(**kw)
+            print(calls)
+        except Exception as e:
+            print(e.args)
+        if not calls:
+            return HttpResponse("debug only")
+        for c in calls:
+            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+            if call_stat:
+                call_stat.time_before_hang = c["duration"]
+                call_stat.status = c["status"]
+                print(call_stat.__dict__)
+                # call_stat.save()
 
     elif request.GET["action"] == "test_call":
         number = "15005550009"
         connecter = TwilioConnecter()
         caller = TwilioCaller(connecter.client)
         data = caller.make_call(number=number)
-
-        # for number in numbers:
-        #     print(number)
-        #     info = CallStat(phone_dialed=number, time_before_hang=0, sid=sids[number.number], status="sended")
-        #     infos.append(info)
-
-        # CallStat.objects.bulk_create(infos)
 
         number_model = CeleryPhoneModel.objects.filter(number=number).first()
 
