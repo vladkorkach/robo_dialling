@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import loader
 import re
 
@@ -169,8 +169,6 @@ def debug_call_route(request):
             if call_stat:
                 call_stat.time_before_hang = c["duration"]
                 call_stat.status = c["status"]
-                print("!@##")
-                print(call_stat.__dict__)
                 call_stat.save()
 
     else:
@@ -192,3 +190,13 @@ def debug_call_route(request):
 
         call_stat.save()
     return HttpResponse("debug only")
+
+
+def xml_voice(request):
+    a = """
+    <Response>
+    <Say voice="alice">Thanks for trying our documentation. Enjoy!</Say>
+    <Play>http://demo.twilio.com/docs/classic.mp3</Play>
+    </Response>
+    """
+    return HttpResponse(a, content_type="application/xrd+xml")
