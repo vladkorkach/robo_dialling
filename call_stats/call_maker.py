@@ -10,7 +10,7 @@ def test_check(func):
         if self.test_mode:
             res = False
         else:
-            res = func(self)
+            res = func(self, *args, **kwargs)
         return res
     return _decorator
 
@@ -34,7 +34,8 @@ class TwilioConnecter:
         return data.balance
 
     @test_check
-    def get_calls_list(self, **kwargs):
+    def get_calls_list(self, *args, **kwargs):
+
         if 'start_time_after' in kwargs and 'start_time_before' in kwargs:
             after = datetime.strptime(kwargs["start_time_after"], "%Y-%m-%d")
             before = datetime.strptime(kwargs["start_time_before"], "%Y-%m-%d")
@@ -94,3 +95,6 @@ class TwilioCaller:
             response = [call, None]
 
         return response
+
+    def synchronization(self):
+        pass

@@ -124,11 +124,38 @@ def twilio_callback(request):
         call_stat.save()
 
 
+def test_call_route(request):
+    number = "15005550009"
+    connecter = TwilioConnecter()
+    caller = TwilioCaller(connecter.client)
+    data = caller.make_call(number=number)
+
+    number_model = CeleryPhoneModel.objects.filter(number=number).first()
+
+    if data[0]:
+        call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+    else:
+        stat = True
+        if data[1].phone_status:
+            stat = False
+        debug_info = json.dumps(data[1].__dict__)
+        call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat,
+                             sid=None, status="wrong")
+
+    call_stat.save()
+
+
 def debug_call_route(request):
     if request.GET["action"] == "synchronize":
+        """synchronize stats if call back will not work"""
         connecter = TwilioConnecter()
-        print(connecter.client.username)
-        kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
+        today = timezone.now().date()
+
+        data = CallStat.objects.filter(status="sended").last()
+        from_ = data.date.strftime('%Y-%m-%d')
+        today = today.strftime('%Y-%m-%d')
+
+        kw = {"start_time_after": from_, "start_time_before": today}
         calls = None
         try:
             calls = connecter.get_calls_list(**kw)
@@ -142,27 +169,9 @@ def debug_call_route(request):
             if call_stat:
                 call_stat.time_before_hang = c["duration"]
                 call_stat.status = c["status"]
+                print("!@##")
                 print(call_stat.__dict__)
-                # call_stat.save()
-
-    elif request.GET["action"] == "test_call":
-        number = "15005550009"
-        connecter = TwilioConnecter()
-        caller = TwilioCaller(connecter.client)
-        data = caller.make_call(number=number)
-
-        number_model = CeleryPhoneModel.objects.filter(number=number).first()
-
-        if data[0]:
-            call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
-        else:
-            stat = True
-            if data[1].phone_status:
-                stat = False
-            debug_info = json.dumps(data[1].__dict__)
-            call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat, sid=None, status="wrong")
-
-        call_stat.save()
+                call_stat.save()
 
     else:
         sid = request.GET["CallSid"]

@@ -6,7 +6,8 @@ import celery
 from celery import shared_task, task
 from .models import CeleryPhoneModel, CallStat
 import logging
-from .call_maker import TwilioConnecter, TwilioCaller
+from django.utils import timezone
+from .call_maker import TwilioCaller, TwilioConnecter
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -58,21 +59,28 @@ def make_twilio_call(*args, **kwargs):
 
         call_stat.save()
 
-    # CallStat.objects.bulk_create(infos)
-
 
 @shared_task(name="SyncWithTwilioStats")
 def sync_with_twilio_stats(*args, **kwargs):
-    """need if callbacks will not work correctly"""
-    connecter = TwilioConnecter()
-    """set this data to task kwargs"""
-    kw = {"start_time_after": "2015-01-01", "start_time_before": "2016-01-01"}
-    calls = connecter.get_calls_list(**kw)
-    print(calls)
-    for c in calls:
-        call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-        if call_stat:
-            call_stat.time_before_hang = c["duration"]
-            call_stat.status = c["status"]
-            print(call_stat.__dict__)
-            # call_stat.save()
+        connecter = TwilioConnecter()
+        today = timezone.now().date()
+
+        data = CallStat.objects.filter(status="sended").last()
+        from_ = data.date.strftime('%Y-%m-%d')
+        today = today.strftime('%Y-%m-%d')
+
+        kw = {"start_time_after": from_, "start_time_before": today}
+        calls = None
+        try:
+            calls = connecter.get_calls_list(**kw)
+            print(calls)
+        except Exception as e:
+            print(e.args)
+
+        for c in calls:
+            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+            if call_stat:
+                call_stat.time_before_hang = c["duration"]
+                call_stat.status = c["status"]
+
+                call_stat.save()
