@@ -53,6 +53,7 @@ class TwilioSetting(models.Model):
     test_mode = models.BooleanField(default=True)
     test_account_sid = models.CharField(max_length=255, null=True, blank=True)
     test_auth_token = models.CharField(max_length=255, null=True, blank=True)
+    test_phone_number = models.CharField(max_length=255, null=True, blank=True, default="15005550006")
 
     # def save(self, *args, **kwargs):
     #     pass
