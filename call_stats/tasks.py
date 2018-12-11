@@ -65,7 +65,7 @@ def sync_with_twilio_stats(*args, **kwargs):
         connecter = TwilioConnecter()
         today = timezone.now().date()
 
-        data = CallStat.objects.filter(status="sended").last()
+        data = CallStat.objects.filter(status="queued").last()
         from_ = data.date.strftime('%Y-%m-%d')
         today = today.strftime('%Y-%m-%d')
 

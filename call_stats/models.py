@@ -55,8 +55,5 @@ class TwilioSetting(models.Model):
     test_auth_token = models.CharField(max_length=255, null=True, blank=True)
     test_phone_number = models.CharField(max_length=255, null=True, blank=True, default="15005550006")
 
-    # def save(self, *args, **kwargs):
-    #     pass
-
     def __str__(self):
         return self.user.username

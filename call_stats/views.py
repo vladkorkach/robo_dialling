@@ -57,7 +57,7 @@ def index(request):
         .annotate(total=Count('phone_dialed'))\
         .order_by('date')\
         .prefetch_related("phone_dialed")\
-        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["sended", "wrong"])
+        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["queued", "wrong"])
 
     l = []
     names = []
@@ -123,72 +123,72 @@ def twilio_callback(request):
         call_stat.save()
 
 
-def test_call_route(request):
-    number = "15005550009"
-    connecter = TwilioConnecter()
-    caller = TwilioCaller(connecter.client)
-    data = caller.make_call(number=number)
+# def test_call_route(request):
+#     number = "15005550009"
+#     connecter = TwilioConnecter()
+#     caller = TwilioCaller(connecter.client)
+#     data = caller.make_call(number=number)
+#
+#     number_model = CeleryPhoneModel.objects.filter(number=number).first()
+#
+#     if data[0]:
+#         call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+#     else:
+#         stat = True
+#         if data[1].phone_status:
+#             stat = False
+#         debug_info = json.dumps(data[1].__dict__)
+#         call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat,
+#                              sid=None, status="wrong")
+#
+#     call_stat.save()
 
-    number_model = CeleryPhoneModel.objects.filter(number=number).first()
 
-    if data[0]:
-        call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
-    else:
-        stat = True
-        if data[1].phone_status:
-            stat = False
-        debug_info = json.dumps(data[1].__dict__)
-        call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat,
-                             sid=None, status="wrong")
-
-    call_stat.save()
-
-
-def debug_call_route(request):
-    if request.GET["action"] == "synchronize":
-        """synchronize stats if call back will not work"""
-        connecter = TwilioConnecter()
-        today = timezone.now().date()
-
-        data = CallStat.objects.filter(status="sended").last()
-        from_ = data.date.strftime('%Y-%m-%d')
-        today = today.strftime('%Y-%m-%d')
-
-        kw = {"start_time_after": from_, "start_time_before": today}
-        calls = None
-        try:
-            calls = connecter.get_calls_list(**kw)
-            print(calls)
-        except Exception as e:
-            print(e.args)
-        if not calls:
-            return HttpResponse("debug only")
-        for c in calls:
-            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-            if call_stat:
-                call_stat.time_before_hang = c["duration"]
-                call_stat.status = c["status"]
-                call_stat.save()
-
-    else:
-        sid = request.GET["CallSid"]
-        to = request.GET["To"]
-        status = request.GET["CallStatus"]
-
-        connecter = TwilioConnecter()
-        call_info = connecter.get_call_info(sid)
-
-        if call_info:
-            call_stat = CallStat.objects.filter(sid=sid).first()
-            call_stat.time_before_hang = call_info.duration
-            call_stat.status = status
-
-        else:
-            call_stat = CallStat.objects.filter(sid=sid).first()
-            call_stat.status = status
-
-        call_stat.save()
-    return HttpResponse("debug only")
+# def debug_call_route(request):
+#     if request.GET["action"] == "synchronize":
+#         """synchronize stats if call back will not work"""
+#         connecter = TwilioConnecter()
+#         today = timezone.now().date()
+#
+#         data = CallStat.objects.filter(status="sended").last()
+#         from_ = data.date.strftime('%Y-%m-%d')
+#         today = today.strftime('%Y-%m-%d')
+#
+#         kw = {"start_time_after": from_, "start_time_before": today}
+#         calls = None
+#         try:
+#             calls = connecter.get_calls_list(**kw)
+#             print(calls)
+#         except Exception as e:
+#             print(e.args)
+#         if not calls:
+#             return HttpResponse("debug only")
+#         for c in calls:
+#             call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+#             if call_stat:
+#                 call_stat.time_before_hang = c["duration"]
+#                 call_stat.status = c["status"]
+#                 call_stat.save()
+#
+#     else:
+#         sid = request.GET["CallSid"]
+#         to = request.GET["To"]
+#         status = request.GET["CallStatus"]
+#
+#         connecter = TwilioConnecter()
+#         call_info = connecter.get_call_info(sid)
+#
+#         if call_info:
+#             call_stat = CallStat.objects.filter(sid=sid).first()
+#             call_stat.time_before_hang = call_info.duration
+#             call_stat.status = status
+#
+#         else:
+#             call_stat = CallStat.objects.filter(sid=sid).first()
+#             call_stat.status = status
+#
+#         call_stat.save()
+#     return HttpResponse("debug only")
 
 
 def xml_voice(request):
