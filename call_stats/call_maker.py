@@ -83,7 +83,6 @@ class TwilioConnecter:
 class TwilioCaller:
     def __init__(self, client: Client):
         self.client = client
-        print(self.client.s_phone_number)
 
     def make_call(self, number):
         root_url = BASE_URL

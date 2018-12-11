@@ -118,18 +118,7 @@ CELERY_TIMEZONE = ''
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 BEAT_SYNC_EVERY = 1
 
-
-# Live Twilio settings
-TWILIO_AUTH_TOKEN = ""
-TWILIO_SID = ""
-TWILIO_FROM_NUMBER = ""
 TWILIO_ROOT_URL = "https://api.twilio.com/"
-
-
-# Test Twilio settings
-# TWILIO_SID = "ACada4efaa7fcfa63fa1844812798cb0f6"
-# TWILIO_AUTH_TOKEN = "cabaedc73d9c50e76758c5fc4299839b"
-# TWILIO_FROM_NUMBER = "15005550006"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

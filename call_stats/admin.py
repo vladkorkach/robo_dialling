@@ -49,7 +49,7 @@ class CeleryPhoneModelAdmin(admin.ModelAdmin):
 
 
 class TwilioSettingAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("user", "test_mode")
 
 
 admin.site.register(CallStat, CallStatAdmin)
