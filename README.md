@@ -1,17 +1,19 @@
+####setup
+info will be provided later
+
+
 ####usage
 log in to admin panel
 
-set your twilio credentials here
+set your twilio credentials here. Please note, calls don't work in test mode
 ```
 http://yourdomain.com/admin/call_stats/twiliosetting/
 ```
 
-go to phone settings by following url
+In order to set up calls schedule use this page
 ```
 http://yourdomain.com/admin/call_stats/celeryphonemodel/
 ```
-
-set up phone numbers and intervals for calls
 
 Statistics will be shown on page
 ```
@@ -20,9 +22,9 @@ http://yourdomain.com/call_stats
 
 ####sync with twilio statistics
 
-go to admin panel 
+In order to change twilio synchronization settings, use this page
 
-create new task 
+ 
 ```
 http://yourdomain.com/admin/django_celery_beat/periodictask/
 ```
