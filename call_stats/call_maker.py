@@ -3,6 +3,7 @@ from datetime import datetime
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 from robo_call.settings import TWILIO_AUTH_TOKEN, TWILIO_SID, TWILIO_ROOT_URL, BASE_URL, TWILIO_FROM_NUMBER
+from .models import TwilioSetting
 
 
 def test_check(func):
@@ -17,9 +18,13 @@ def test_check(func):
 
 class TwilioConnecter:
     def __init__(self):
-        self.test_mode = False
-        self.auth_token = TWILIO_AUTH_TOKEN
-        self.sid = TWILIO_SID
+        # self.test_mode = False
+        # self.auth_token = TWILIO_AUTH_TOKEN
+        # self.sid = TWILIO_SID
+        self.test_mode = None
+        self.auth_token = None
+        self.sid = None
+        self.get_twilio_settings()
         self.client = Client(self.sid, self.auth_token)
         self.root_url = TWILIO_ROOT_URL
         self.account = self.get_account_info()
@@ -32,6 +37,9 @@ class TwilioConnecter:
     def get_balance(self):
         data = self.account.balance.fetch()
         return data.balance
+
+    def get_twilio_settings(self):
+        pass
 
     @test_check
     def get_calls_list(self, *args, **kwargs):

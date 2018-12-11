@@ -50,6 +50,12 @@ class TwilioSetting(models.Model):
     account_sid = models.CharField(max_length=255, null=True, blank=True)
     auth_token = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
+    test_mode = models.BooleanField(default=True)
+    test_account_sid = models.CharField(max_length=255, null=True, blank=True)
+    test_auth_token = models.CharField(max_length=255, null=True, blank=True)
+
+    # def save(self, *args, **kwargs):
+    #     pass
 
     def __str__(self):
         return self.user.username

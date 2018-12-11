@@ -1,12 +1,11 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.template import loader
-import re
 
 from .models import CallStat, CeleryPhoneModel
 from django.http import HttpResponse
 from django.db.models import Count
 import json
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 from .exporter import Exporter
 from .call_maker import TwilioCaller, TwilioConnecter
@@ -194,6 +193,7 @@ def debug_call_route(request):
 
 def xml_voice(request):
     a = """
+    <?xml version="1.0" encoding="UTF-8"?>
     <Response>
     <Say voice="alice">Thanks for trying our documentation. Enjoy!</Say>
     <Play>http://demo.twilio.com/docs/classic.mp3</Play>
