@@ -49,20 +49,6 @@ def generate_chart_object(names, data):
     return chart_settings
 
 
-def prepare_filters_for_calls(data):
-    """
-
-    :param data: dict
-    data {
-        statuses: [],
-        dates_range: [],
-
-    }
-    :return:
-    """
-    pass
-
-
 def index(request):
     """
     view for building and preparing chart.
@@ -76,8 +62,8 @@ def index(request):
     monday_of_this_week = monday_of_last_week + timedelta(days=7)
 
     week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
-    week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
-    week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
+    week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).filter(status__in=["completed"]).count()
+    week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).exclude(status__in=["completed", "queued"]).count()
 
     a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\

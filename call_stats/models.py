@@ -4,6 +4,12 @@ from django_celery_beat.models import PeriodicTask, PeriodicTasks
 
 
 class CeleryPhoneModel(PeriodicTask):
+    """
+    extended from celery periodic tasks
+    works in the same way
+    overwritten function save to store phone pk for using in celery tasks
+    and set default caller task name
+    """
     number = models.CharField(max_length=14, null=True, blank=True)
     department = models.CharField(max_length=255, null=True, blank=True)
     organization = models.CharField(max_length=255, null=True, blank=True)
@@ -32,6 +38,15 @@ class CeleryPhoneModel(PeriodicTask):
 
 
 class CallStat(models.Model):
+    """
+    Model for storing call statistics
+    contains fields
+    time_before_hand - technically it's call duration info from twilio
+    phone_dialed - binding to CeleryPhoneModel
+    sid - call SID from twilio
+    status - twilio call status or wrong
+    debug_info - if call not available saves error info in json format
+    """
     phone_dialed = models.ForeignKey(CeleryPhoneModel, null=True, blank=True, on_delete=models.CASCADE)
     time_before_hang = models.IntegerField()
     phone_is_active = models.BooleanField(default=True)
@@ -46,6 +61,10 @@ class CallStat(models.Model):
 
 
 class TwilioSetting(models.Model):
+    """
+    Stores twilio account info
+    User can choose mode - test or live. In test mode system uses test_twilio_settings
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, to_field='username', null=True, blank=True)
     account_sid = models.CharField(max_length=255, null=True, blank=True)
     auth_token = models.CharField(max_length=255, null=True, blank=True)

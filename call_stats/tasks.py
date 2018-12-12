@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+import random
 
 import celery
 from celery import shared_task, task
@@ -8,6 +9,7 @@ from .models import CeleryPhoneModel, CallStat
 import logging
 from django.utils import timezone
 from .call_maker import TwilioCaller, TwilioConnecter
+from .helpers import randomDate
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -101,8 +103,17 @@ def sync_with_twilio_stats(*args, **kwargs):
 
 @shared_task(name="GenerateFakeData")
 def generate_fake_data(*args, **kwargs):
+    """
+    Generate some fake data
+    :param args:
+    :param kwargs:
+    :return:
+    """
     numbers = CeleryPhoneModel.objects.all()
+    statuses = ["wrong", "completed", "queued", "busy", "no-answer", "canceled", "failed", "initiated", "ringing",
+                "in-progress"]
     for number in numbers:
-        statuses = ["wrong", "completed", "queued", "busy", "no-answer", "canceled", "failed", "initiated", "ringing", "in-progress"]
-        # call_stat = CallStat(phone_dialed=number, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+        date = randomDate("2018-12-09", "2018-12-09", random.random())
+
+        call_stat = CallStat(phone_dialed=number, time_before_hang=random.randint(0, 14), sid="", status=statuses[random.randint(0, len(statuses))], date=date)
 

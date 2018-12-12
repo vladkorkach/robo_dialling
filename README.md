@@ -38,7 +38,7 @@ call statuses
 
 ```
 [
-    "wrong", # twilio don't able to make call. See details in debug_info in CallStat model
+    "wrong", # twilio don't able to make call. See details in debug_info in CallStat model. custom status
     "completed", # twilio made call with success
     "queued", # call waits in queue
     "busy", # busy responce
