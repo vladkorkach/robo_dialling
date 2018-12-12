@@ -76,6 +76,8 @@ def index(request):
     monday_of_this_week = monday_of_last_week + timedelta(days=7)
 
     week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
+    week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
+    week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
 
     a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\
@@ -115,7 +117,9 @@ def index(request):
     context = {
         "chart": json.dumps(chart_object),
         "twilio_balance": "{}".format(str(balance)),
-        "total_this_week": week_count
+        "total_this_week": week_count,
+        "wrong": week_wrong_count,
+        "success": week_success_count,
     }
     return HttpResponse(template.render(context, request))
 

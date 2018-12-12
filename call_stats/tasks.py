@@ -40,6 +40,12 @@ class TaskWrapper(celery.Task):
 
 @shared_task(name='TwilioCaller', base=TaskWrapper)
 def make_twilio_call(*args, **kwargs):
+    """
+    task, created from CeleryPhoneModel
+    :param args:
+    :param kwargs:
+    :return:
+    """
     numbers = CeleryPhoneModel.objects.filter(id__in=args)
     # infos = []
     connecter = TwilioConnecter()
@@ -62,28 +68,35 @@ def make_twilio_call(*args, **kwargs):
 
 @shared_task(name="SyncWithTwilioStats")
 def sync_with_twilio_stats(*args, **kwargs):
-        connecter = TwilioConnecter()
-        today = timezone.now().date()
+    """
+    uses for synchronizing twilio statistics with our databases
+    if twilio callbacks don't work, launch this task as usual celery periodic task
+    :param args: usual celery args
+    :param kwargs: usual celery kwargs
+    :return: None, writes changed call info into database
+    """
+    connecter = TwilioConnecter()
+    today = timezone.now().date()
 
-        data = CallStat.objects.filter(status="queued").last()
-        from_ = data.date.strftime('%Y-%m-%d')
-        today = today.strftime('%Y-%m-%d')
+    data = CallStat.objects.filter(status="queued").last()
+    from_ = data.date.strftime('%Y-%m-%d')
+    today = today.strftime('%Y-%m-%d')
 
-        kw = {"start_time_after": from_, "start_time_before": today}
-        calls = None
-        try:
-            calls = connecter.get_calls_list(**kw)
-            print(calls)
-        except Exception as e:
-            print(e.args)
+    kw = {"start_time_after": from_, "start_time_before": today}
+    calls = None
+    try:
+        calls = connecter.get_calls_list(**kw)
+        print(calls)
+    except Exception as e:
+        print(e.args)
 
-        for c in calls:
-            call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-            if call_stat:
-                call_stat.time_before_hang = c["duration"]
-                call_stat.status = c["status"]
+    for c in calls:
+        call_stat = CallStat.objects.filter(sid=c["sid"]).first()
+        if call_stat:
+            call_stat.time_before_hang = c["duration"]
+            call_stat.status = c["status"]
 
-                call_stat.save()
+            call_stat.save()
 
 
 @shared_task(name="GenerateFakeData")

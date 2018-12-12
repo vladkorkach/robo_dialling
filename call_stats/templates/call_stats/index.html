@@ -20,7 +20,19 @@
                 <div class="calls_this_week alert alert-info">Twilio Ballance: {{ twilio_balance }}</div>
             </div>
             <div class="col-md-4">
-                <div class="calls_this_week alert alert-info">Calls This Week: {{ total_this_week }}</div>
+                <div class="calls_this_week alert alert-info">
+                    <div>Calls This Week: {{ total_this_week }}</div>
+                    <div>Successful calls: {{ success }}</div>
+                    <div>Incorrect calls: {{ wrong }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-control form-control-md">
+                    <option name="" value="">Completed</option>
+                    <option name="" value="">Canceled</option>
+                    <option name="" value="">Queued</option>
+                    <option name="" value="">Incorrect recipient numbers</option>
+                </select>
             </div>
         </div>
         <div class="row">
