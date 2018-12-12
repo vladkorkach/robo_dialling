@@ -21,17 +21,6 @@ class Exporter:
         self.parse_and_convert()
         self.process_and_save()
 
-    @property
-    def names(self):
-        headers = [
-            "Organization",
-            "Department",
-            "Purpose",
-            "Phone Number"
-        ]
-
-        return headers
-
     def parse_and_convert(self):
         data = self.df.to_dict('records')
         self.data_as_dict = data

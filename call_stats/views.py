@@ -1,17 +1,23 @@
 from django.shortcuts import redirect
 from django.template import loader
 
-from .models import CallStat, CeleryPhoneModel
+from .models import CallStat
 from django.http import HttpResponse
 from django.db.models import Count
 import json
 from datetime import timedelta
 from django.utils import timezone
 from .exporter import Exporter
-from .call_maker import TwilioCaller, TwilioConnecter
+from .call_maker import TwilioConnecter
 
 
 def generate_chart_object(names, data):
+    """
+
+    :param names: organization names for chart
+    :param data: statistics to display
+    :return: dict with amchart settings and data
+    """
     graphs = []
 
     for n in names:
@@ -43,7 +49,26 @@ def generate_chart_object(names, data):
     return chart_settings
 
 
+def prepare_filters_for_calls(data):
+    """
+
+    :param data: dict
+    data {
+        statuses: [],
+        dates_range: [],
+
+    }
+    :return:
+    """
+    pass
+
+
 def index(request):
+    """
+    view for building and preparing chart.
+    :param request:
+    :return:
+    """
     template = loader.get_template("call_stats/index.html")
 
     some_day_last_week = timezone.now().date() - timedelta(days=7)
@@ -96,6 +121,12 @@ def index(request):
 
 
 def upload_file(request):
+    """
+    route for export csv phone numbers data
+    launches exporter script from exporter.py
+    :param request:
+    :return redirect back to admin CeleryPhoneModel page:
+    """
     file_obj = request.FILES['db_file']
     try:
         Exporter(file_object=file_obj)
@@ -106,6 +137,14 @@ def upload_file(request):
 
 
 def twilio_callback(request):
+    """
+    route for twilio callback
+    more information here:
+    https://www.twilio.com/docs/voice/api/call?code-sample=code-create-a-call-and-specify-a-statuscallbackevent#statuscallback
+    Note: you need verified ssl certificate for domain to get twilio callbacks
+    :param request:
+    :return:
+    """
     sid = request.POST["CallSid"]
     to = request.POST["To"]
     status = request.POST["CallStatus"]
@@ -121,82 +160,3 @@ def twilio_callback(request):
         call_stat = CallStat.objects.filter(sid=sid).first()
         call_stat.status = status
         call_stat.save()
-
-
-# def test_call_route(request):
-#     number = "15005550009"
-#     connecter = TwilioConnecter()
-#     caller = TwilioCaller(connecter.client)
-#     data = caller.make_call(number=number)
-#
-#     number_model = CeleryPhoneModel.objects.filter(number=number).first()
-#
-#     if data[0]:
-#         call_stat = CallStat(phone_dialed=number_model, time_before_hang=0, sid=data[0].sid, status=data[0].status)
-#     else:
-#         stat = True
-#         if data[1].phone_status:
-#             stat = False
-#         debug_info = json.dumps(data[1].__dict__)
-#         call_stat = CallStat(phone_dialed=number_model, debug_info=debug_info, time_before_hang=0, phone_is_active=stat,
-#                              sid=None, status="wrong")
-#
-#     call_stat.save()
-
-
-# def debug_call_route(request):
-#     if request.GET["action"] == "synchronize":
-#         """synchronize stats if call back will not work"""
-#         connecter = TwilioConnecter()
-#         today = timezone.now().date()
-#
-#         data = CallStat.objects.filter(status="sended").last()
-#         from_ = data.date.strftime('%Y-%m-%d')
-#         today = today.strftime('%Y-%m-%d')
-#
-#         kw = {"start_time_after": from_, "start_time_before": today}
-#         calls = None
-#         try:
-#             calls = connecter.get_calls_list(**kw)
-#             print(calls)
-#         except Exception as e:
-#             print(e.args)
-#         if not calls:
-#             return HttpResponse("debug only")
-#         for c in calls:
-#             call_stat = CallStat.objects.filter(sid=c["sid"]).first()
-#             if call_stat:
-#                 call_stat.time_before_hang = c["duration"]
-#                 call_stat.status = c["status"]
-#                 call_stat.save()
-#
-#     else:
-#         sid = request.GET["CallSid"]
-#         to = request.GET["To"]
-#         status = request.GET["CallStatus"]
-#
-#         connecter = TwilioConnecter()
-#         call_info = connecter.get_call_info(sid)
-#
-#         if call_info:
-#             call_stat = CallStat.objects.filter(sid=sid).first()
-#             call_stat.time_before_hang = call_info.duration
-#             call_stat.status = status
-#
-#         else:
-#             call_stat = CallStat.objects.filter(sid=sid).first()
-#             call_stat.status = status
-#
-#         call_stat.save()
-#     return HttpResponse("debug only")
-
-
-# def xml_voice(request):
-#     a = """
-#     <?xml version="1.0" encoding="UTF-8"?>
-#     <Response>
-#     <Say voice="alice">Thanks for trying our documentation. Enjoy!</Say>
-#     <Play>http://demo.twilio.com/docs/classic.mp3</Play>
-#     </Response>
-#     """
-#     return HttpResponse(a, content_type="application/xrd+xml")

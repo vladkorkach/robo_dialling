@@ -84,3 +84,12 @@ def sync_with_twilio_stats(*args, **kwargs):
                 call_stat.status = c["status"]
 
                 call_stat.save()
+
+
+@shared_task(name="GenerateFakeData")
+def generate_fake_data(*args, **kwargs):
+    numbers = CeleryPhoneModel.objects.all()
+    for number in numbers:
+        statuses = ["wrong", "completed", "queued", "busy", "no-answer", "canceled", "failed", "initiated", "ringing", "in-progress"]
+        # call_stat = CallStat(phone_dialed=number, time_before_hang=0, sid=data[0].sid, status=data[0].status)
+
