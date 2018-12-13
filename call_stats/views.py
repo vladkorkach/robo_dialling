@@ -10,6 +10,8 @@ from django.utils import timezone
 from .exporter import Exporter
 from .call_maker import TwilioConnecter
 
+# todo make chart duration-date
+
 
 def generate_chart_object(names, data):
     """
@@ -40,7 +42,7 @@ def generate_chart_object(names, data):
         },
         "categoryAxis": {
             "parseDates": True,
-            "minPeriod": "hh"
+            "minPeriod": "mm"
         },
         "categoryField": "date",
         "dataDateFormat": "YYYY-MM-DD JJ:NN:SS",
@@ -52,8 +54,8 @@ def generate_chart_object(names, data):
 def index(request):
     """
     view for building and preparing chart.
-    :param request:
-    :return:
+    :param request: usual django request
+    :return:template with chart data
     """
     template = loader.get_template("call_stats/index.html")
 
@@ -79,10 +81,10 @@ def index(request):
     for data in a:
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
-            tmp["date"] = data["date"].strftime('%Y-%m-%d %H')
+            tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
             tmp[data["phone_dialed__organization"]] = data['total']
         else:
-            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H'):
+            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
                 else:
@@ -90,7 +92,7 @@ def index(request):
             else:
                 l.append(tmp)
                 tmp = {}
-                tmp["date"] = data["date"].strftime('%Y-%m-%d %H')
+                tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
                 tmp[data["phone_dialed__organization"]] = data['total']
         l.append(tmp)
     myset = set(names)

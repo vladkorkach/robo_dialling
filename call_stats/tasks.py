@@ -110,10 +110,9 @@ def generate_fake_data(*args, **kwargs):
     :return:
     """
     numbers = CeleryPhoneModel.objects.all()
-    statuses = ["wrong", "completed", "queued", "busy", "no-answer", "canceled", "failed", "initiated", "ringing",
-                "in-progress"]
+    statuses = ["wrong", "completed", "queued", "no-answer", "canceled", "failed", "in-progress"]
     for number in numbers:
         date = randomDate("2018-12-09", "2018-12-09", random.random())
 
-        call_stat = CallStat(phone_dialed=number, time_before_hang=random.randint(0, 14), sid="", status=statuses[random.randint(0, len(statuses))], date=date)
-
+        call_stat = CallStat(phone_dialed=number, time_before_hang=random.randint(0, 14), sid="", status=statuses[random.randint(0, len(statuses)-1)], date=date)
+        call_stat.save()
