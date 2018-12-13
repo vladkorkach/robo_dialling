@@ -10,8 +10,6 @@ from django.utils import timezone
 from .exporter import Exporter
 from .call_maker import TwilioConnecter
 
-# todo make chart duration-date
-
 
 def generate_chart_object(names, data):
     """
@@ -57,6 +55,8 @@ def index(request):
     :param request: usual django request
     :return:template with chart data
     """
+    chart_type = request.GET.get('c')
+
     template = loader.get_template("call_stats/index.html")
 
     some_day_last_week = timezone.now().date() - timedelta(days=7)
@@ -66,6 +66,14 @@ def index(request):
     week_count = CallStat.objects.filter(date__gte=monday_of_this_week).count()
     week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).filter(status__in=["completed"]).count()
     week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).exclude(status__in=["completed", "queued"]).count()
+
+    if chart_type:
+        wrong_a = CallStat.objects.all()\
+        .values('date', 'phone_dialed__organization')\
+        .annotate(total=Count('phone_dialed'))\
+        .order_by('date')\
+        .prefetch_related("phone_dialed")\
+        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["completed", "queued"])
 
     a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\
@@ -95,6 +103,26 @@ def index(request):
                 tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
                 tmp[data["phone_dialed__organization"]] = data['total']
         l.append(tmp)
+
+    for data in wrong_a:
+        data["phone_dialed__organization"] = "incorrect " + data["phone_dialed__organization"]
+        names.append(data["phone_dialed__organization"])
+        if "date" not in tmp:
+            tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+            tmp[data["phone_dialed__organization"]] = data['total']
+        else:
+            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
+                if data["phone_dialed__organization"] in tmp:
+                    tmp[data["phone_dialed__organization"]] += data['total']
+                else:
+                    tmp[data["phone_dialed__organization"]] = data['total']
+            else:
+                l.append(tmp)
+                tmp = {}
+                tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+                tmp[data["phone_dialed__organization"]] = data['total']
+        l.append(tmp)
+
     myset = set(names)
     names = list(myset)
     chart_object = generate_chart_object(names, l)
