@@ -55,8 +55,6 @@ def index(request):
     :param request: usual django request
     :return:template with chart data
     """
-    chart_type = request.GET.get('c')
-
     template = loader.get_template("call_stats/index.html")
 
     some_day_last_week = timezone.now().date() - timedelta(days=7)
@@ -67,8 +65,7 @@ def index(request):
     week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).filter(status__in=["completed"]).count()
     week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).exclude(status__in=["completed", "queued"]).count()
 
-    if chart_type:
-        wrong_a = CallStat.objects.all()\
+    wrong_a = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization')\
         .annotate(total=Count('phone_dialed'))\
         .order_by('date')\
@@ -89,10 +86,10 @@ def index(request):
     for data in a:
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
-            tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+            tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
             tmp[data["phone_dialed__organization"]] = data['total']
         else:
-            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
+            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M-%S'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
                 else:
@@ -100,7 +97,7 @@ def index(request):
             else:
                 l.append(tmp)
                 tmp = {}
-                tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+                tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
                 tmp[data["phone_dialed__organization"]] = data['total']
         l.append(tmp)
 

@@ -22,15 +22,17 @@
             <div class="col-md-4">
                 <div class="calls_this_week alert alert-info">
                     <div>Calls This Week: {{ total_this_week }}</div>
-                    <div>Successful calls: {{ success }}</div>
-                    <div>Incorrect calls: {{ wrong }}</div>
                 </div>
             </div>
             <div class="col-md-4">
-                <select class="form-control form-control-md">
-                    <option name="" value="">Count per organization</option>
-                    <option name="" value="">Duration-date</option>
-                </select>
+                <div class="calls_this_week alert alert-info">
+                    <div>Successful calls: {{ success }}</div>
+                    <div>Incorrect calls: {{ wrong }}</div>
+                </div>
+{#                <select class="form-control form-control-md">#}
+{#                    <option name="" value="">Count per organization</option>#}
+{#                    <option name="" value="">Duration-date</option>#}
+{#                </select>#}
             </div>
         </div>
         <div class="row">
