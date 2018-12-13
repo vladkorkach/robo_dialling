@@ -1,9 +1,9 @@
 from django.shortcuts import redirect
 from django.template import loader
 
-from .models import CallStat
+from .models import CallStat, CeleryPhoneModel
 from django.http import HttpResponse
-from django.db.models import Count
+from django.db.models import Count, Sum, F
 import json
 from datetime import timedelta
 from django.utils import timezone
@@ -23,9 +23,18 @@ def generate_chart_object(names, data):
     for n in names:
         tmp = {
             "bullet": "round",
+            "bulletBorderAlpha": 1,
+            "bulletSize": 10,
+            "lineThickness": 3,
+            "bulletAlpha": 0,
             "valueField": n,
             "labelText": "[[key]]",
-            "title": n
+            "title": n,
+            "bulletBorderThickness": 1,
+            # "fillAlphas": 0.3,
+            "fillColorsField": "lineColor",
+            "legendValueText": "[[value]]",
+            "lineColorField": "lineColor",
         }
 
         graphs.append(tmp)
@@ -65,60 +74,89 @@ def index(request):
     week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).filter(status__in=["completed"]).count()
     week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).exclude(status__in=["completed", "queued"]).count()
 
-    wrong_a = CallStat.objects.all()\
-        .values('date', 'phone_dialed__organization')\
-        .annotate(total=Count('phone_dialed'))\
-        .order_by('date')\
-        .prefetch_related("phone_dialed")\
-        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["completed", "queued"])
+    organizations = CeleryPhoneModel.objects.values_list('organization', flat=True).distinct().order_by()
+    print(organizations)
+    colors = ["#00ff00", "#ff0000", "#0000ff"]
+    mm = dict(zip(organizations, colors))
 
-    a = CallStat.objects.all()\
-        .values('date', 'phone_dialed__organization')\
-        .annotate(total=Count('phone_dialed'))\
+    # no_response = CallStat.objects.all()\
+    #     .values('date', 'phone_dialed__organization')\
+    #     .annotate(total=Count('phone_dialed'))\
+    #     .order_by('date')\
+    #     .prefetch_related("phone_dialed")\
+    #     .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["completed", "queued"])
+
+    with_response = CallStat.objects.all()\
+        .values('date', 'phone_dialed__organization', 'status', 'time_before_hang')\
+        .annotate(total=F('time_before_hang'))\
         .order_by('date')\
         .prefetch_related("phone_dialed")\
-        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["queued", "wrong"])
+        .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["queued", "ringing"])
 
     l = []
     names = []
     tmp = {}
 
-    for data in a:
+    colors = {
+        0: "#00ff00", 1: "#ff0000", 2: "#0000ff"
+    }
+
+    for data in with_response:
+        # print(data)
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
             tmp[data["phone_dialed__organization"]] = data['total']
+            if data['status'] == 'wrong':
+                tmp["lineColor"] = "#ebebec"
+            else:
+                tmp["lineColor"] = mm[data["phone_dialed__organization"]]
         else:
             if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M-%S'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
+                    if data['status'] == 'wrong':
+                        tmp["lineColor"] = "#FF0000"
+                    else:
+                        tmp["lineColor"] = ""
                 else:
                     tmp[data["phone_dialed__organization"]] = data['total']
+                    if data['status'] == 'wrong':
+                        tmp["lineColor"] = "#FF0000"
+                    else:
+                        tmp["lineColor"] = ""
             else:
                 l.append(tmp)
                 tmp = {}
                 tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
                 tmp[data["phone_dialed__organization"]] = data['total']
+                if data['status'] == 'wrong':
+                    tmp["lineColor"] = "#FF0000"
+                else:
+                    tmp["lineColor"] = ""
         l.append(tmp)
 
-    for data in wrong_a:
-        data["phone_dialed__organization"] = "incorrect " + data["phone_dialed__organization"]
-        names.append(data["phone_dialed__organization"])
-        if "date" not in tmp:
-            tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
-            tmp[data["phone_dialed__organization"]] = data['total']
-        else:
-            if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
-                if data["phone_dialed__organization"] in tmp:
-                    tmp[data["phone_dialed__organization"]] += data['total']
-                else:
-                    tmp[data["phone_dialed__organization"]] = data['total']
-            else:
-                l.append(tmp)
-                tmp = {}
-                tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
-                tmp[data["phone_dialed__organization"]] = data['total']
-        l.append(tmp)
+    # for data in no_response:
+    #     data["phone_dialed__organization"] = "incorrect " + data["phone_dialed__organization"]
+    #     names.append(data["phone_dialed__organization"])
+    #     if "date" not in tmp:
+    #         tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+    #         tmp[data["phone_dialed__organization"]] = data['total']
+    #     else:
+    #         if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
+    #             if data["phone_dialed__organization"] in tmp:
+    #                 tmp[data["phone_dialed__organization"]] += data['total']
+    #                 tmp["lineColor"] = "#ebebec"
+    #             else:
+    #                 tmp[data["phone_dialed__organization"]] = data['total']
+    #                 tmp["lineColor"] = "#ebebec"
+    #         else:
+    #             l.append(tmp)
+    #             tmp = {}
+    #             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
+    #             tmp[data["phone_dialed__organization"]] = data['total']
+    #             tmp["lineColor"] = "#ebebec"
+    #     l.append(tmp)
 
     myset = set(names)
     names = list(myset)
@@ -133,6 +171,7 @@ def index(request):
         "total_this_week": week_count,
         "wrong": week_wrong_count,
         "success": week_success_count,
+        "title": "chart"
     }
     return HttpResponse(template.render(context, request))
 
