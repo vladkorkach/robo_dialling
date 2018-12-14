@@ -79,13 +79,6 @@ def index(request):
     colors = ["#00ff00", "#ff0000", "#0000ff"]
     mm = dict(zip(organizations, colors))
 
-    # no_response = CallStat.objects.all()\
-    #     .values('date', 'phone_dialed__organization')\
-    #     .annotate(total=Count('phone_dialed'))\
-    #     .order_by('date')\
-    #     .prefetch_related("phone_dialed")\
-    #     .filter(date__gte=timezone.now().date() - timedelta(days=2)).exclude(status__in=["completed", "queued"])
-
     with_response = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization', 'status', 'time_before_hang')\
         .annotate(total=F('time_before_hang'))\
@@ -96,10 +89,6 @@ def index(request):
     l = []
     names = []
     tmp = {}
-
-    colors = {
-        0: "#00ff00", 1: "#ff0000", 2: "#0000ff"
-    }
 
     for data in with_response:
         # print(data)
@@ -135,28 +124,6 @@ def index(request):
                 else:
                     tmp["lineColor"] = ""
         l.append(tmp)
-
-    # for data in no_response:
-    #     data["phone_dialed__organization"] = "incorrect " + data["phone_dialed__organization"]
-    #     names.append(data["phone_dialed__organization"])
-    #     if "date" not in tmp:
-    #         tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
-    #         tmp[data["phone_dialed__organization"]] = data['total']
-    #     else:
-    #         if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M'):
-    #             if data["phone_dialed__organization"] in tmp:
-    #                 tmp[data["phone_dialed__organization"]] += data['total']
-    #                 tmp["lineColor"] = "#ebebec"
-    #             else:
-    #                 tmp[data["phone_dialed__organization"]] = data['total']
-    #                 tmp["lineColor"] = "#ebebec"
-    #         else:
-    #             l.append(tmp)
-    #             tmp = {}
-    #             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M')
-    #             tmp[data["phone_dialed__organization"]] = data['total']
-    #             tmp["lineColor"] = "#ebebec"
-    #     l.append(tmp)
 
     myset = set(names)
     names = list(myset)

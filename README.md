@@ -9,6 +9,14 @@ set your twilio credentials here. Please note, calls don't work in test mode
 ```
 http://yourdomain.com/admin/call_stats/twiliosetting/
 ```
+fields
+
+- test_mode - activate test mode (default True)
+- account_sid - twilio account SID
+- auth_token - twilio auth token
+- test_twilio_sid - test twilio sid. Used only if test mode is True
+- test_auth_token - test auth token. Used only if test mode is True
+- user - default django user. Twilio works for admin account only for now
 
 In order to set up calls schedule use this page
 ```
