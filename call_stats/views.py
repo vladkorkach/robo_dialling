@@ -88,7 +88,7 @@ def index(request):
         if "date" not in tmp:
             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
             tmp[data["phone_dialed__organization"]] = data['total']
-            if data['status'] == 'wrong':
+            if data['status'] in ['wrong', 'canceled', 'no-answer']:
                 tmp["lineColor"] = "#FF0000"
             else:
                 tmp["lineColor"] = ""
@@ -96,13 +96,13 @@ def index(request):
             if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M-%S'):
                 if data["phone_dialed__organization"] in tmp:
                     tmp[data["phone_dialed__organization"]] += data['total']
-                    if data['status'] == 'wrong':
+                    if data['status'] in ['wrong', 'canceled', 'no-answer']:
                         tmp["lineColor"] = "#FF0000"
                     else:
                         tmp["lineColor"] = ""
                 else:
                     tmp[data["phone_dialed__organization"]] = data['total']
-                    if data['status'] == 'wrong':
+                    if data['status'] in ['wrong', 'canceled', 'no-answer']:
                         tmp["lineColor"] = "#FF0000"
                     else:
                         tmp["lineColor"] = ""
@@ -111,7 +111,7 @@ def index(request):
                 tmp = {}
                 tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
                 tmp[data["phone_dialed__organization"]] = data['total']
-                if data['status'] == 'wrong':
+                if data['status'] in ['wrong', 'canceled', 'no-answer']:
                     tmp["lineColor"] = "#FF0000"
                 else:
                     tmp["lineColor"] = ""
