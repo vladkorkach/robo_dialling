@@ -97,7 +97,7 @@ def index(request):
             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
             tmp[data["phone_dialed__organization"]] = data['total']
             if data['status'] == 'wrong':
-                tmp["lineColor"] = "#ebebec"
+                tmp["lineColor"] = "#FF0000"
             else:
                 tmp["lineColor"] = mm[data["phone_dialed__organization"]]
         else:

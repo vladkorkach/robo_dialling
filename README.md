@@ -28,6 +28,10 @@ Statistics will be shown on page
 http://yourdomain.com/call_stats
 ```
 
+ - x-axis represents dates
+ - y-axis represents time of call by organization (or sum of calls if several calls for one organization made in same time)
+broken and not answered calls has red color
+
 ####sync with twilio statistics
 
 In order to change twilio synchronization settings, use this page
