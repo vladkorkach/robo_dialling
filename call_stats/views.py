@@ -1,9 +1,9 @@
 from django.shortcuts import redirect
 from django.template import loader
 
-from .models import CallStat, CeleryPhoneModel
+from .models import CallStat
 from django.http import HttpResponse
-from django.db.models import Count, Sum, F
+from django.db.models import F
 import json
 from datetime import timedelta
 from django.utils import timezone
@@ -13,7 +13,6 @@ from .call_maker import TwilioConnecter
 
 def generate_chart_object(names, data):
     """
-
     :param names: organization names for chart
     :param data: statistics to display
     :return: dict with amchart settings and data
@@ -31,7 +30,6 @@ def generate_chart_object(names, data):
             "labelText": "[[key]]",
             "title": n,
             "bulletBorderThickness": 1,
-            # "fillAlphas": 0.3,
             "fillColorsField": "lineColor",
             "legendValueText": "[[value]]",
             "lineColorField": "lineColor",
@@ -74,11 +72,6 @@ def index(request):
     week_success_count = CallStat.objects.filter(date__gte=monday_of_this_week).filter(status__in=["completed"]).count()
     week_wrong_count = CallStat.objects.filter(date__gte=monday_of_this_week).exclude(status__in=["completed", "queued"]).count()
 
-    organizations = CeleryPhoneModel.objects.values_list('organization', flat=True).distinct().order_by()
-    print(organizations)
-    colors = ["#00ff00", "#ff0000", "#0000ff"]
-    mm = dict(zip(organizations, colors))
-
     with_response = CallStat.objects.all()\
         .values('date', 'phone_dialed__organization', 'status', 'time_before_hang')\
         .annotate(total=F('time_before_hang'))\
@@ -91,7 +84,6 @@ def index(request):
     tmp = {}
 
     for data in with_response:
-        # print(data)
         names.append(data["phone_dialed__organization"])
         if "date" not in tmp:
             tmp["date"] = data["date"].strftime('%Y-%m-%d %H-%M-%S')
@@ -99,7 +91,7 @@ def index(request):
             if data['status'] == 'wrong':
                 tmp["lineColor"] = "#FF0000"
             else:
-                tmp["lineColor"] = mm[data["phone_dialed__organization"]]
+                tmp["lineColor"] = ""
         else:
             if tmp["date"] == data["date"].strftime('%Y-%m-%d %H-%M-%S'):
                 if data["phone_dialed__organization"] in tmp:
@@ -174,12 +166,11 @@ def twilio_callback(request):
 
     connecter = TwilioConnecter()
     call_info = connecter.get_call_info(sid)
-
+    call_stat = CallStat.objects.filter(sid=sid).first()
     if call_info:
-        call_stat = CallStat.objects.filter(sid=sid).first()
         call_stat.time_before_hang = call_info.duration
         call_stat.status = status
     else:
-        call_stat = CallStat.objects.filter(sid=sid).first()
         call_stat.status = status
-        call_stat.save()
+
+    call_stat.save()

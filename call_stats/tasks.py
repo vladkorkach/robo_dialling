@@ -4,7 +4,7 @@ import json
 import random
 
 import celery
-from celery import shared_task, task
+from celery import shared_task
 from .models import CeleryPhoneModel, CallStat
 import logging
 from django.utils import timezone

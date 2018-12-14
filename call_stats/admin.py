@@ -6,6 +6,9 @@ from call_stats.models import CeleryPhoneModel, CallStat, TwilioSetting
 
 
 class ExportCsvMixin:
+    """
+    uses for saving statistics into csv file row by row
+    """
     def export_as_csv(self, request, queryset):
 
         meta = self.model._meta
