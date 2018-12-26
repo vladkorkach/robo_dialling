@@ -1,7 +1,3 @@
-####setup
-info will be provided later
-
-
 ####usage
 log in to admin panel
 

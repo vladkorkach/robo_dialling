@@ -52,6 +52,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'robo_call.urls'
+APPEND_SLASH = False
 
 TEMPLATES = [
     {
