@@ -156,7 +156,6 @@ def twilio_callback(request):
     route for twilio callback
     more information here:
     https://www.twilio.com/docs/voice/api/call?code-sample=code-create-a-call-and-specify-a-statuscallbackevent#statuscallback
-    Note: you need verified ssl certificate for domain to get twilio callbacks
     :param request:
     :return:
     """
@@ -174,3 +173,5 @@ def twilio_callback(request):
         call_stat.status = status
 
     call_stat.save()
+
+    # return HttpResponse('')

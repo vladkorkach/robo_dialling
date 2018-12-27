@@ -111,6 +111,3 @@ class TwilioCaller:
             response = [call, None]
 
         return response
-
-    def synchronization(self):
-        pass
