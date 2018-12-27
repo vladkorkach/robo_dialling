@@ -176,4 +176,4 @@ def twilio_callback(request):
 
     call_stat.save()
 
-    return HttpResponse('')
+    return HttpResponse(status=200)
