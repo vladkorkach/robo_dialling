@@ -9,6 +9,7 @@ from datetime import timedelta
 from django.utils import timezone
 from .exporter import Exporter
 from .call_maker import TwilioConnecter
+from django.views.decorators.csrf import csrf_exempt
 
 
 def generate_chart_object(names, data):
@@ -151,6 +152,7 @@ def upload_file(request):
     return redirect("call_stats/celeryphonemodel")
 
 
+@csrf_exempt
 def twilio_callback(request):
     """
     route for twilio callback
@@ -174,4 +176,4 @@ def twilio_callback(request):
 
     call_stat.save()
 
-    # return HttpResponse('')
+    return HttpResponse('')
